@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# dotenv
+.env
+
+# logs
+logs
+*.log
+
+# build
+dist/
+build/
+
+# misc
+.DS_Store
