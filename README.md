@@ -48,4 +48,4 @@ ENTER AUTH ROUTER
                 ---> router.post('/signin', authController.signin);
                 required: EMAIL and PASSWORD
 
-                ---> RESPONSE: get token (expiry time: 1 Hour)   || token required for each and everD
+                ---> RESPONSE: get token (expiry time: 1 Hour)   || token required for each and every API call
