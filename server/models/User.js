@@ -10,7 +10,9 @@ const userSchema = new mongoose.Schema({
   resetPasswordToken: { type: String, default: null},
   resetPasswordExpires: { type: Date, default: null},
   twoFactorSecret: { type: String, default: null},
-  createdAt: {type: Date, default: Date.now}
+  createdAt: {type: Date, default: Date.now},
+  resetPasswordToken: {type: String},
+  resetPasswordExpires: {type: Date}
 });
 
 module.exports = mongoose.model('User', userSchema);
