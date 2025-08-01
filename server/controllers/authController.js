@@ -9,7 +9,8 @@ const { generateJWT } = require('../utils/jwtConfig');
 
 
 
-// SIGN UP WITH EMAIL AND PASSWROD FUNCTION MODULE-----------------------------------------------------------------------------
+// --------------------------------------------------- JWT SIGN UP AND SIGN IN---------------------------------------------------------
+// --------------------------------------------------- JWT SIGN UP AND SIGN IN---------------------------------------------------------
 const SignUpWithJWT = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -38,11 +39,40 @@ const SignUpWithJWT = async (req, res) => {
     return res.status(500).json({ msg: "INTERNAL SERVER ERROR" });
   }
 };
-//------------------------------------------------------------------------------------------------------------------------------
+
+// JWT SIGN IN
+const SignInWithJWT = async(req, res)=>{
+  const {email, password} = req.body;
+  try {
+    const user = await User.findOne({email: email});
+    if(!user){
+      return res.status(401).json({msg: "User doesn't exist. Please sign up"});
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if(!isMatch){
+      return res.status(401).json({msg: "Incorrect password, Please try again"});
+    }
+    const token = generateJWT(user);
+    const userData = {
+      email: user.email, name: user.name
+    }
+    return res.status(200).json({data: userData, token: token, msg: "Signed in successfully"});
+
+  } catch (error) {
+    return res.status(500).json({msg: "INTERNAL SERVER ERROR"});
+  }
+}
+// --------------------------------------------------- JWT SIGN UP AND SIGN IN---------------------------------------------------------
+// --------------------------------------------------- JWT SIGN UP AND SIGN IN---------------------------------------------------------
 
 
 
-// SIGN UP WITH GOOGLE FUNCTION MODULE------------------------------------------------------------------------------------------
+
+
+
+
+// ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
+// ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
 const SignUpWithGoogle = async (req, res) => {
   const googleToken = req.header('Authorization')?.replace('Bearer google:', '');
 
@@ -56,7 +86,7 @@ const SignUpWithGoogle = async (req, res) => {
 
     if (user) {
       const jwtToken = generateJWT(user);
-      return res.status(200).json({ token: jwtToken, msg: "User already exists. Signed in instead." });
+      return res.status(200).json({ token: jwtToken, msg: "User already exists. Please sign in." });
     }
 
     user = new User({
@@ -69,14 +99,40 @@ const SignUpWithGoogle = async (req, res) => {
     await user.save();
 
     const jwtToken = generateJWT(user);
-    return res.status(200).json({ token: jwtToken, msg: "New Google user signed up" });
+    return res.status(200).json({ token: jwtToken, msg: "Successfully signed up with google." });
 
   } catch (error) {
-    console.error("Google signup error:", error);
     return res.status(500).json({ msg: "INTERNAL SERVER ERROR" });
   }
 };
-//------------------------------------------------------------------------------------------------------------------------------
+
+
+// SIGN IN WITH GOOGLE
+const SignInWithGoogle = async(req, res)=>{
+  const googleToken = req.header('Authorization')?.replace('Bearer google:', '');
+  if(!googleToken) {
+    return res.status(500).json({msg: "Invalid auth token"});
+  }
+
+  try {
+    const decodedToken = await firebaseAdmin.auth().verifyIdToken(googleToken);
+    const user = await User.findOne({ email: decodedToken.email });
+    if (!user) {
+      return res.status(404).json({ msg: "User doesn't exist. Please sign up" });
+    }
+    const jwtToken = generateJWT(user);
+    const userData = {name: decodedToken.name, email: decodedToken.email};
+    return res.status(200).json({ token: jwtToken, data: userData, msg: "Signed in successfully" });
+  } catch (error) {
+    return res.status(500).json({ msg: "INTERNAL SERVER ERROR" });
+  }
+}
+// ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
+// ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
+
+
+
+
 
 
 
@@ -118,30 +174,38 @@ exports.signup = [
 
 
 
+
+
+
+
+
+
+
 // SIGN IN CONTROLLER ----------------------------------------------------------------------------------------------------------
 exports.signin = [
-  body('email').isEmail().withMessage('Invalid email format'),
-  body('password').notEmpty().withMessage('Password is required'),
+  async (req, res, next) => {
+    if (req.body.provider === 'local') {
+      await Promise.all([
+        body('email').isEmail().withMessage('Invalid email format').run(req),
+        body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters').run(req),
+      ]);
+    }
+    next();
+  },
 
+
+
+  
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const { email, password } = req.body;
-
-    try {
-      const user = await User.findOne({ email });
-      if (!user) return res.status(400).json({ msg: "INVALID CREDENTIALS" });
-
-      const isCorrectPassword = await bcrypt.compare(password, user.password);
-      if (!isCorrectPassword) return res.status(400).json({ msg: "INCORRECT PASSWORD" });
-
-      const token = generateJWT(user);
-      res.json({ token });
-
-    } catch (error) {
-      console.error("Sign-in error:", error);
-      res.status(500).json({ msg: "SERVER ERROR" });
+    const {provider} = req.body;
+    switch (provider) {
+      case 'local':
+        return SignInWithJWT(req, res);    
+      case 'google':
+        return SignInWithGoogle(req, res);
     }
   }
 ];

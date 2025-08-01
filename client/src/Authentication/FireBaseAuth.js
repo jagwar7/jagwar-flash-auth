@@ -1,17 +1,27 @@
 import React from "react";
-import { SignUpWithGooleController } from "./AuthHanlder";
+import { SignInWithGoogleController, SignUpWithGooleController } from "./AuthHanlder";
 
 
 
 const FireBaseAuth = () => {
 
 
-  const handleGoogleLogin = async()=>{
+  const handleGoogleSignUp = async()=>{
     SignUpWithGooleController();
   }
 
+  const handleGoogleSignIn = async()=>{
+    SignInWithGoogleController();
+  }
 
-  return <button onClick={handleGoogleLogin}>Sign in with Google</button>;
+
+  return(
+    <div>
+      <button onClick={handleGoogleSignUp}>Sign UP with Google</button>
+      <button onClick={handleGoogleSignIn}>Sign IN with Google</button>
+    </div>
+  )
+   
 };
 
 export default FireBaseAuth;
