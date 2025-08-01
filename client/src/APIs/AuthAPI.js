@@ -15,3 +15,18 @@ export const SignUpWithGoogle = async(googleToken)=>{
     );
     return response.data;
 }
+
+
+
+export const SignInWithGoogle = async(googleToken)=>{
+    const response = await axios.post(`${serverURL}/signin`, 
+        {provider: 'google'}, 
+        {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization : `Bearer google:${googleToken}`
+            }
+        }
+    );
+    return response.data;
+}
