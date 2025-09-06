@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const User = require('../models/User');
+const User = require('../models/User.model');
 const { body, validationResult } = require('express-validator');
 const firebaseAdmin = require('../config/firebaseAdmin');
 const { generateJWT } = require('../utils/jwtConfig');
@@ -26,7 +26,7 @@ const SignUpWithJWT = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      provider: 'local'
+      authType: 'local'
     });
 
     await user.save();
@@ -93,7 +93,7 @@ const SignUpWithGoogle = async (req, res) => {
       name: decodedToken.name,
       email: decodedToken.email,
       googleId: decodedToken.uid,
-      provider: 'google'
+      authType: 'google'
     });
 
     await user.save();
@@ -143,7 +143,7 @@ const SignInWithGoogle = async(req, res)=>{
 // SIGN UP CONTROLLER-----------------------------------------------------------------------------------------------------------
 exports.signup = [
   async (req, res, next) => {
-    if (req.body.provider === 'local') {
+    if (req.body.authType === 'local') {
       await Promise.all([
         body('email').isEmail().withMessage('Invalid email format').run(req),
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters').run(req),
@@ -158,9 +158,9 @@ exports.signup = [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { provider = 'local' } = req.body;
+    const { authType = 'local' } = req.body;
 
-    switch (provider) {
+    switch (authType) {
       case 'local':
         return SignUpWithJWT(req, res);
       case 'google':
@@ -184,7 +184,7 @@ exports.signup = [
 // SIGN IN CONTROLLER ----------------------------------------------------------------------------------------------------------
 exports.signin = [
   async (req, res, next) => {
-    if (req.body.provider === 'local') {
+    if (req.body.authType === 'local') {
       await Promise.all([
         body('email').isEmail().withMessage('Invalid email format').run(req),
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters').run(req),
@@ -200,8 +200,8 @@ exports.signin = [
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const {provider} = req.body;
-    switch (provider) {
+    const {authType} = req.body;
+    switch (authType) {
       case 'local':
         return SignInWithJWT(req, res);    
       case 'google':

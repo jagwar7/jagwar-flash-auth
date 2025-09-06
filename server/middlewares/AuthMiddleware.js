@@ -19,7 +19,7 @@ const AuthProviderSwitcher = (req, res, next)=>{
 
     return res.status(401).json({msg: "Unsupported login provider"});
 }
-
+// "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Yjg2MjE4Y2M3NzVhYThlOTZkN2ZmOSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU2OTk4NDM4LCJleHAiOjE3NTcwODQ4Mzh9.dZKx-XJZfTorxxlZzsM6zXzvx1oEHJVfvt385Qmmi_g",
 
 
 // VERIFY FIREBASE TOKEN BEFORE SIGN IN
@@ -31,7 +31,7 @@ const VerifyGoogleToken = async (req, res, token ,next)=>{
             email: decodedToken.email,
             name: decodedToken.name,
             picture: decodedToken.picture,
-            provider: decodedToken.firebase?.sign_in_provider || 'google',
+            authType: 'google',
 
         };
 
@@ -53,7 +53,7 @@ const VerifyJWTToken = (req, res, token, next)=>{
             id: decodeToken.id,
             email: decodeToken.email,
             name: decodeToken.name,
-            provider: 'jwt'
+            authType: 'jwt'
         };
         next();
     }catch(err){

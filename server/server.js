@@ -1,6 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const AuthRouter = require('./routes/Auth');
+const AuthRouter = require('./routes/AuthRouter');
+const FlashAuthRouter = require('./routes/FlashAuthRouter');
+const CredentialsRouter = require('./routes/CredentialsRouter');
+
 require('dotenv').config();
 const cors = require('cors'); 
 
@@ -8,7 +11,6 @@ const server = express();
 
 
 // REQUIRED COMPONENTS----------------------------------------------------------------------------------------------------
-// ✅ Fix here
 server.use(cors({
   origin: 'http://localhost:3000',
   credentials: true
@@ -36,6 +38,8 @@ mongoose.connect(process.env.MONGODB_CONNECTION_URL).then(()=>{
 
 // AUTHENTICATION ROUTES -------------------------------------------------------------------------------------------------
 server.use('/api/auth', AuthRouter);
+server.use('/api/flashauth', FlashAuthRouter);
+server.use('/api/credentials', CredentialsRouter);
 //------------------------------------------------------------------------------------------------------------------------
 
 
