@@ -19,20 +19,25 @@ router.get('/google/url', async(req, res)=>{
         if(!creds){
             return res.status(400).json({error: "Invalid ClientID or Missing credentials"});
         }
-        const {firebaseAppID, firebaseAPIkey, redirectUri} = creds;
+        // console.log("CREDENTIALS ", creds);
+        const {googleClientId, googleClientSecret, redirectUri} = creds;
 
         const oAuthClientInstance = new OAuth2Client(
-            firebaseAppID,
-            firebaseAPIkey,
+            googleClientId,
+            googleClientSecret,
             redirectUri
         );
         const authURL = oAuthClientInstance.generateAuthUrl({
             access_type: "offline",
             scope: ["profile", "email"],
-            prompt: "select_account"
+            prompt: "select_account",
+            state: clientId
         });
         console.log("AUTH URL ", authURL);
-        return res.json({authURL: authURL});
+        const data = {
+            callbackURL: authURL
+        }
+        return res.json(data);
     } catch (error) {
         console.log("INTERNAL SERVER ERROR ", error);
         return res.status(400).json({msg: "Error while generating google auth URL"});
@@ -43,27 +48,28 @@ router.get('/google/url', async(req, res)=>{
 
 
 router.get('/google/callback', async(req, res)=>{
+    console.log("ENTERED GOOGLE CALLBACK");
+    let creds;
     try {
-        const {code, clientId} = req.query;
-        if(!code || !clientId){
+        const {code, state} = req.query;
+        if(!code || !state){
             return res.status(400).send("Missing auth code or client ID");
         }
-        const creds = await UserCredentials.findOne({ clientPublicId: clientId });
+        creds = await UserCredentials.findOne({ clientPublicKey: state });
         if(!creds){
             return res.status(400).send("Invalid client ID");
         }
-
-        const {firebaseAppID, firebaseAPIkey, redirectUri} = creds;
+        const {googleClientId, googleClientSecret, redirectUri} = creds;
         const oAuthClientInstance = new OAuth2Client(
-            firebaseAppID,
-            firebaseAPIkey,
+            googleClientId,
+            googleClientSecret,
             redirectUri
         );
-        const {token} = await oAuthClientInstance.getToken(code);
-        oAuthClientInstance.setCredentials(token);
+        const tokenResponse = await oAuthClientInstance.getToken(code);
+        oAuthClientInstance.setCredentials(tokenResponse.tokens.id_token);
 
         const ticket = await oAuthClientInstance.verifyIdToken({
-            idToken: token.id_token,
+            idToken: tokenResponse.tokens.id_token,
             audience: googleClientId,
         });
 
@@ -75,9 +81,9 @@ router.get('/google/callback', async(req, res)=>{
         email: payload.email,
         picture: payload.picture,
         };
+        console.log(creds);
 
-
-        const flashToken = jwt.sign(userProfile, process.env.FLASHAUTH_SECRET, {
+        const flashToken = jwt.sign(userProfile, process.env.JWT_SECRET_KEY, {
         expiresIn: "1h",
         });
 
@@ -85,7 +91,7 @@ router.get('/google/callback', async(req, res)=>{
                         <script>
                             window.opener.postMessage(
                             { type: "FLASHAUTH_TOKEN", token: "${flashToken}" },
-                            "${creds.frontEndURL}"
+                            "http://localhost:3000"
                             );
                             window.close();
                         </script>
@@ -102,6 +108,6 @@ router.get('/google/callback', async(req, res)=>{
                 </script>
         `);
     }
-})
+});
 
 module.exports = router;

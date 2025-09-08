@@ -40,7 +40,9 @@ router.put('/update', AuthProviderSwitcher, async(req, res)=>{
             firebaseProjectID,
             firebaseAppID,
             redirectUri,
-            mongoUri
+            mongoUri,
+            googleClientId,
+            googleClientSecret
             } = req.body;
 
         if (
@@ -51,7 +53,9 @@ router.put('/update', AuthProviderSwitcher, async(req, res)=>{
             !firebaseProjectID ||
             !firebaseAppID ||
             !redirectUri ||
-            !mongoUri
+            !mongoUri ||
+            !googleClientId ||
+            !googleClientSecret
         ) {
             return res.status(400).json({ msg: "All fields are required" });
         }
@@ -66,7 +70,9 @@ router.put('/update', AuthProviderSwitcher, async(req, res)=>{
                 firebaseProjectID,
                 firebaseAppID,
                 redirectUri,
-                mongoUri
+                mongoUri,
+                googleClientId,
+                googleClientSecret
             });
         } else {
             Object.assign(creds, {
@@ -77,7 +83,9 @@ router.put('/update', AuthProviderSwitcher, async(req, res)=>{
                 firebaseProjectID,
                 firebaseAppID,
                 redirectUri,
-                mongoUri
+                mongoUri,
+                googleClientId,
+                googleClientSecret
             });
         }
         await creds.save();
