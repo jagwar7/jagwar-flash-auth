@@ -47,6 +47,8 @@ router.get('/google/url', async(req, res)=>{
 
 
 
+
+//  GOOGLE AUTH RESPONSE AFTER USER ATTTEMPTS TO LOGIN VIA GOOGLE------------------------------------------------
 router.get('/google/callback', async(req, res)=>{
     console.log("ENTERED GOOGLE CALLBACK");
     let creds;
@@ -76,10 +78,10 @@ router.get('/google/callback', async(req, res)=>{
         const payload = ticket.getPayload();
 
         const userProfile = {
-        id: payload.sub,
-        name: payload.name,
-        email: payload.email,
-        picture: payload.picture,
+            id: payload.sub,
+            name: payload.name,
+            email: payload.email,
+            picture: payload.picture,
         };
         console.log(creds);
 
