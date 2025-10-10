@@ -2,21 +2,18 @@ const mongoose = require('mongoose');
 
 
 const UserCredentials = new mongoose.Schema({
+    owner: {type: mongoose.Schema.Types.ObjectId, required: true},
+    clientFrontEndURL : {type: String, required: true},
     clientPublicKey: { type: String, required: true, unique: true }, 
-    clientSecret: { type: String, required: true },          
-    firebaseAPIkey: { type: String, required: true },       // FIREBASE API KEY
-    firebaseAuthDomain: { type: String, required: true },   // FIREBASE AUTH DOMAIN
-    firebaseProjectID: { type: String, required: true },    // FIREBASE PROJECT ID
-    firebaseAppID: { type: String, required: true },        // FIREBASE APP ID
-    redirectUri: { type: String, required: true },           
-    mongoUri: { type: String, required: true },            // USER'S:  MONGODB URI      
-    googleClientId: { type: String, required: true },   // GOOGLE CLIENT ID
-    googleClientSecret: { type: String, required: true }, // GOOGLE CLIENT SECRET        
+    clientSecretKey: { type: String, required: true, unique: true},          
+    clientMongoDbUri: { type: String, required: true },             // USER'S:  MONGODB URI      
+    googleClientId: { type: String, required: true },            // GOOGLE CLIENT ID
+    googleClientSecret: { type: String, required: true },       // GOOGLE CLIENT SECRET   
+    tokenExpiryDuration: {type: String, required: true, default: '1h'},        // 1h, 2h
     createdAt: { type: Date, default: Date.now },
+},{
+    collection: 'usercredentials'
 });
 
-module.exports = mongoose.model('UserCredentials', UserCredentials);
+module.exports = {UserCredentials};
 
-// clientid: 46763810748-e0cis8m2t3o7jnc1r3af486887f3u7pk.apps.googleusercontent.com
-// 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
-// https://flashauth-test.firebaseapp.com/__/auth/handler

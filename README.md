@@ -101,3 +101,85 @@ LOCAL PASSWORD RESET:
                     Return unexpected error, If there ---END---
                 
 
+
+
+
+
+
+---------------------------------------- USER SCHEMA AND RULES FOR FLASHAUTH -----------------------------------------------------
+USER's REQUIRED INFORMATION:
+    ---> NAME, EMAIL, PASSWORD (for local auth only)
+    ---> USER ROLE, AUTH TYPE,
+    ---> RESET PASSWORD TOKEN, RESET TOKEN EXPIRY(duration: Date())
+
+
+
+
+
+------------------------------------------------ CLIENT'S USER PROPERTY ----------------------------------------------------------
+USER's PROFILE INFORMATIONS:
+    ---> NAME, EMAIL, PASSWORD (for local auth only)
+    ---> AUTH SOURCE(type) , 
+    ATTENTION: USER WILL HAVE TO FOLLOW THE DEFINED SCHEMA RULE ON FLASHAUTH DOCUMENTATION
+               OTHERWISE FLASHAUTH WILL NOT WORK FOR USER CREATION
+
+    AS ON: 23/09/25 ---> NO MODIFICATION NEEDED FOR MY CLIENT
+
+
+
+
+
+
+
+
+----------------------------------------------- CLIENT'S USER CREDENTIALS ----------------------------------------------------------
+CLIENT's USER CREDENTIALS:
+    ---> CLIENT PUBLIC KEY:         A KEY THAT IS REQUIRED FOR FLASHAUTH TO RECOGNIZE CLIENT SITE
+    ---> CLIENT SECRET KEY:         A KEY THAT WILL STORE IN FLASHAUTH BACKEND FOR CLIENT RECOGNITION
+    ---> GOOGLE CLIENT ID:          FLASHAUTH CLIENT's SITE GOOGLE CLIENT ID (will be stored in flashauth database by hashing) 
+    ---> GOOGLE CLIENT SECRET:      FLASHAUTH CLIENT's SITE GOOGLE CLIENT SECRET (will be stored in flashauth database by hashing)
+    ---> CLIENT's MONGODB URL :     FLASHAUTH WILL USE THIS FOR CREATING USER AT CLIENT's DATABASE  
+    ---> TOKEN EXPIRY TIME:         CLIENT CAN DECIDE THE DURATION FOR LOGIN HIS USER [ENUM]
+
+
+
+
+
+
+
+
+
+---------------------------------------- UNIVERSAL USER SCHEMA FOR CLIENT's USERs --------------------------------------------------
+CLIENT's USER CREDENTIALS:
+    ---> NAME: REQUIRED
+    ---> EMAIL: REQUIRED
+    ---> FALSH_AUTH_USER_ID: AUTO GENERATED :: REQUIRED
+    ---> AUTH_PROVIDER: [google, local, github] :: REQUIRED
+    ---> PASSWORD(hash): FOR LOCAL AUTH(JWT) ONLY :: REQUIRED
+    ---> AVATAR: DOESNT REQURIED
+    ---> EMAIL VERIFIED: FALSE (default)
+    ---> CREATED AT: DATE
+    ---> UPDATED AT: DATE
+    ---> PASSWORD RESET TOKEN
+    ---> PASSWORD EXPIRY TOKEN
+
+WORKFLOW:
+    ---> GOOGLE SIGN IN :
+            ::-> FlashAuth will attempt sign in:
+                PASS USER DATA (name, email, password) to FlashAuth backend, 
+                FlashAuth will check if user exist by EMAIL (in client's database)
+                    if Yes, Then sign in and Return user data as token,
+                
+                Otherwise, Create a new user by schema rules and return token
+
+
+
+TEMPORARY:
+
+googleClientId : 46763810748-e0cis8m2t3o7jnc1r3af486887f3u7pk.apps.googleusercontent.com
+googleClientSecret: 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
+mongoUri: mongodb+srv://flashauthtest:Akhter2000@cluster0.4txup3q.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+callback: http://localhost:5900/api/flashauth/google/callback
+firebaseAPIkey: AIzaSyCgWo4Dz_n5jjjoHs4nAitXSWh5Dyhjx60
+firebaseAuthDomain : flashauth-test.firebaseapp.com
+firebaseAppId: 1:46763810748:web:0b7607317b14a6a71755b9

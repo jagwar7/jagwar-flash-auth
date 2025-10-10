@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const AuthProviderSwitcher = require('../middlewares/AuthMiddleware');
-const UserCredentials = require('../models/UserCredentials.model.js');
+const { UserCredentials } = require('../models/UserCredentials.model');
+
+
 
 // IT WILL BE CALLED WHEN FORM OPENS TO SUBMIT AND WILL BE FETCHED AND FORM DATA WILL BE FILLED
 router.get('/get', AuthProviderSwitcher, async(req, res)=>{
     try {
-        const creds = await UserCredentials.findOne({userId: req.user.id});
+        const UserCredential = req.db.model('UserCredentials', UserCredentials);
+        const creds = await UserCredential.findOne({clientPublicKey: "62970"});
         if(!creds){
             return res.status(404).json({error: "No credentials found, Please add your credentials."});
         }
-        res.status(200).json({credentials: creds});
+        return res.status(200).json({credentials: creds});
     } catch (error) {
         console.error("Error fetching credentials:", error);
         return res.status(500).json({error: "Error fetching credentials"});
@@ -32,68 +35,44 @@ router.get('/get', AuthProviderSwitcher, async(req, res)=>{
  */
 router.put('/update', AuthProviderSwitcher, async(req, res)=>{
     try {
-        const {
-            clientPublicKey,
-            clientSecret,
-            firebaseAPIkey,
-            firebaseAuthDomain,
-            firebaseProjectID,
-            firebaseAppID,
-            redirectUri,
-            mongoUri,
-            googleClientId,
-            googleClientSecret
-            } = req.body;
+        const{clientFrontEndURL, clientPublicKey, clientSecretKey, clientMongoDbUri,
+             googleClientId, googleClientSecret, tokenExpiryDuration} = req.body;
+        
+        const UserCredential = req.db.model('UserCredentials', UserCredentials);
+        let creds = await UserCredential.findOne({owner: req.user.id});
 
-        if (
-            !clientPublicKey ||
-            !clientSecret ||
-            !firebaseAPIkey ||
-            !firebaseAuthDomain ||
-            !firebaseProjectID ||
-            !firebaseAppID ||
-            !redirectUri ||
-            !mongoUri ||
-            !googleClientId ||
-            !googleClientSecret
-        ) {
-            return res.status(400).json({ msg: "All fields are required" });
-        }
-        let creds = await UserCredentials.findOne({userId: req.user.id});
         if(!creds){
-            creds = new UserCredentials({
-                userId: req.user.id,
+            if(!clientFrontEndURL || !clientPublicKey || !clientSecretKey     ||
+                !clientMongoDbUri || !googleClientId  || ! googleClientSecret   ){
+                    return res.status(400).json({err: "All credentials are required"});
+            }
+
+            creds = new UserCredential({
+                owner: req.user.id,
+                clientFrontEndURL,
                 clientPublicKey,
-                clientSecret,
-                firebaseAPIkey,
-                firebaseAuthDomain,
-                firebaseProjectID,
-                firebaseAppID,
-                redirectUri,
-                mongoUri,
+                clientSecretKey,
+                clientMongoDbUri,
                 googleClientId,
-                googleClientSecret
+                googleClientSecret,
+                tokenExpiryDuration                
             });
-        } else {
-            Object.assign(creds, {
-                clientPublicKey,
-                clientSecret,
-                firebaseAPIkey,
-                firebaseAuthDomain,
-                firebaseProjectID,
-                firebaseAppID,
-                redirectUri,
-                mongoUri,
-                googleClientId,
-                googleClientSecret
-            });
+        }else {
+            creds.clientFrontEndURL = clientFrontEndURL || creds.clientFrontEndURL;
+            creds.clientPublicKey = clientPublicKey || creds.clientPublicKey;
+            creds.clientSecretKey = clientSecretKey || creds.clientSecretKey;
+            creds.clientMongoDbUri = clientMongoDbUri || creds.clientMongoDbUri;
+            creds.googleClientId = googleClientId || creds.googleClientId;
+            creds.googleClientSecret = googleClientSecret || creds.googleClientSecret;
+            creds.tokenExpiryDuration = tokenExpiryDuration || creds.tokenExpiryDuration;
         }
+
         await creds.save();
-        res.status(200).json({msg: "Credentials updated successfully", credentials: creds});
+        return res.status(200).send({msg: "Credentials saved successfully."});
     } catch (error) {
         console.error("Error updating credentials:", error);
-        return res.status(500).json({error: "Error updating credentials"});
+        return res.status(500).json({msg: "There is an error while updating credentials"});
     }
-})
+});
 
 module.exports = router;

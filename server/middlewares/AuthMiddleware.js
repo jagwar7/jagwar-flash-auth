@@ -3,6 +3,8 @@ const firebaseAdmin = require('../config/firebaseAdmin');
 
 
 
+
+
 const AuthProviderSwitcher = (req, res, next)=>{
     let token = req.header('Authorization')?.replace('Bearer ', '');
     if(!token){
@@ -19,7 +21,10 @@ const AuthProviderSwitcher = (req, res, next)=>{
 
     return res.status(401).json({msg: "Unsupported login provider"});
 }
-// "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Yjg2MjE4Y2M3NzVhYThlOTZkN2ZmOSIsInJvbGUiOiJ1c2VyIiwiaWF0IjoxNzU2OTk4NDM4LCJleHAiOjE3NTcwODQ4Mzh9.dZKx-XJZfTorxxlZzsM6zXzvx1oEHJVfvt385Qmmi_g",
+
+
+
+
 
 
 // VERIFY FIREBASE TOKEN BEFORE SIGN IN
