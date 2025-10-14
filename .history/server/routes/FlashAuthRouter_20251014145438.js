@@ -253,8 +253,7 @@ router.post('/local/signin', async(req, res)=>{
         if(signInResponse.success === false){
             return res.status(400).json({success: false, message: signInResponse.message});
         }
-
-        return res.status(200).json({success: true, message: signInResponse.message, data: signInResponse.data});
+        
 
     } catch (error) {
         

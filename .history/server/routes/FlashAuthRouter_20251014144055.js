@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const {OAuth2Client} = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const {RedirectURL}  = require('../utils/constants.js');
-const { findOrCreate, TryLocalSignin} = require('../services/clientUserServices.js');
+const { findOrCreate } = require('../services/clientUserServices.js');
 const { UserCredentials } = require('../models/UserCredentials.model.js');
 
 
@@ -245,16 +245,11 @@ router.post('/local/signin', async(req, res)=>{
         }
         const userProfileInfo = {
             email,
-            password,
+            passwordHash: password,
             authProvider : "local"
         }
-        const signInResponse = await TryLocalSignin(ownerdb.clientMongoDbUri, userProfileInfo);
-
-        if(signInResponse.success === false){
-            return res.status(400).json({success: false, message: signInResponse.message});
-        }
-
-        return res.status(200).json({success: true, message: signInResponse.message, data: signInResponse.data});
+        // const createUserResponse = await findOrCreate(ownerdb.clientMongoDbUri, userProfileInfo);
+        
 
     } catch (error) {
         

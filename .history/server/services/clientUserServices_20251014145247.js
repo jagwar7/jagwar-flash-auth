@@ -128,11 +128,9 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
         return resObj;
     }
 
-    resObj.success = true;
-    resObj.message = "Sign in successfull";
-    resObj.data = user;
+    
 
-    return  resObj;
+    return ;
 }
 //-------------------------------------------------------------------------------------------------------------------
 module.exports = {findOrCreate, TryLocalSignin};

@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
 
 const defaultUserSchema = new mongoose.Schema({
     name: {type: String, required: function(){return this.isNew}},
@@ -89,50 +88,33 @@ async function findOrCreate(clientMongodbUri, userProfile){
 }
 
 
-
-
-
-
-// TRY JWT SIGN IN ---------------------------------------------------------------------------------------------------
 async function TryLocalSignin(clientMongodbUri, userProfile){
     const connection = await getClientConnection(clientMongodbUri); // connectto mongondb database
     const resObj = {
         success: undefined,
-        message: undefined,
-        data: undefined
+        message: undefined
     }
     if(!connection) {
-        resObj.success = false;
-        resObj.message = "INTERNAL SERVER ERROR: Connection to site's database is failed, Contact Admin"
+        resObj.success
         return resObj;
     }
 
     const userColletions = connection.model('user', defaultUserSchema);
     const user = userColletions.findOne({email: userProfile.email});
     if(!user){
-        resObj.success = false;
-        resObj.message = "CLIENT SIDE ERROR: User does not exist, Please sign up";
+        const resObj = {
+            success: false,
+            message: "CLIENT ERROR: User doesnt exist, Please sign up"
+        }
         return resObj;
     }
 
     if(user && user.authProvider !== "local"){
-        resObj.success = false;
-        resObj.message = "CLIENT SIDE ERROR: You have signed up with Google Or Github."
-        return resObj;
+        const resOb
     }
     
-    const isPasswordMatched = bcrypt.compare(userProfile.password, user.passwordHash);
-    if(!isPasswordMatched){
-        resObj.success = false;
-        resObj.message = "CLIENT SIDE ERROR: Incorrect Password";
-        return resObj;
-    }
 
-    resObj.success = true;
-    resObj.message = "Sign in successfull";
-    resObj.data = user;
 
-    return  resObj;
 }
-//-------------------------------------------------------------------------------------------------------------------
-module.exports = {findOrCreate, TryLocalSignin};
+
+module.exports = {findOrCreate};

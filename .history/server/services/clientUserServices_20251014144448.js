@@ -89,17 +89,11 @@ async function findOrCreate(clientMongodbUri, userProfile){
 }
 
 
-
-
-
-
-// TRY JWT SIGN IN ---------------------------------------------------------------------------------------------------
 async function TryLocalSignin(clientMongodbUri, userProfile){
     const connection = await getClientConnection(clientMongodbUri); // connectto mongondb database
     const resObj = {
         success: undefined,
-        message: undefined,
-        data: undefined
+        message: undefined
     }
     if(!connection) {
         resObj.success = false;
@@ -124,15 +118,9 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
     const isPasswordMatched = bcrypt.compare(userProfile.password, user.passwordHash);
     if(!isPasswordMatched){
         resObj.success = false;
-        resObj.message = "CLIENT SIDE ERROR: Incorrect Password";
-        return resObj;
+        resObj.message = ""
     }
 
-    resObj.success = true;
-    resObj.message = "Sign in successfull";
-    resObj.data = user;
-
-    return  resObj;
 }
-//-------------------------------------------------------------------------------------------------------------------
-module.exports = {findOrCreate, TryLocalSignin};
+
+module.exports = {findOrCreate};

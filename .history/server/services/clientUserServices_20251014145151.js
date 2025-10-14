@@ -98,8 +98,7 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
     const connection = await getClientConnection(clientMongodbUri); // connectto mongondb database
     const resObj = {
         success: undefined,
-        message: undefined,
-        data: undefined
+        message: undefined
     }
     if(!connection) {
         resObj.success = false;
@@ -128,11 +127,9 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
         return resObj;
     }
 
-    resObj.success = true;
-    resObj.message = "Sign in successfull";
-    resObj.data = user;
+    
 
-    return  resObj;
+    return ;
 }
 //-------------------------------------------------------------------------------------------------------------------
 module.exports = {findOrCreate, TryLocalSignin};

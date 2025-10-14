@@ -93,13 +93,12 @@ async function findOrCreate(clientMongodbUri, userProfile){
 
 
 
-// TRY JWT SIGN IN ---------------------------------------------------------------------------------------------------
+// TRY JWT SIGN IN 
 async function TryLocalSignin(clientMongodbUri, userProfile){
     const connection = await getClientConnection(clientMongodbUri); // connectto mongondb database
     const resObj = {
         success: undefined,
-        message: undefined,
-        data: undefined
+        message: undefined
     }
     if(!connection) {
         resObj.success = false;
@@ -128,11 +127,8 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
         return resObj;
     }
 
-    resObj.success = true;
-    resObj.message = "Sign in successfull";
-    resObj.data = user;
+    return user;
 
-    return  resObj;
 }
-//-------------------------------------------------------------------------------------------------------------------
-module.exports = {findOrCreate, TryLocalSignin};
+
+module.exports = {findOrCreate};
