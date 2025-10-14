@@ -12,7 +12,7 @@ const defaultUserSchema = new mongoose.Schema({
         }
     },
     avatar: {type: String},
-    emailVerified: {type: Boolean, default: function(){return this.authProvider == "google"}},
+    emailVerified: {type: Boolean, default: function(){return this.authProvider === "local"}},
     passwordResetToken: {type: String},
     passwordResetTokenExpiry: {type: Date},
 },{
@@ -58,9 +58,13 @@ async function findOrCreate(clientMongodbUri, userProfile){
     const User = connection.model('user', defaultUserSchema);
     let user = await User.findOne({email: userProfile.email});
 
+    
+    // if(userProfile.authProvider === "local"){
+    //     if(user){ // FOR THE CASE , WHEN USER ALREADY EXISTS IN CLINT'S OWN DATABASE
+    //     }
+    // }
     if(user) {
         if(userProfile.authProvider === "local"){
-            
             const resObj = {
                 success: false,
                 message: "User already exists. Please sign in"

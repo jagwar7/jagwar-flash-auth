@@ -228,31 +228,7 @@ router.post('/local/signup', async(req, res)=>{
 router.post('/local/signin', async(req, res)=>{
     const clientId = req.header('X-Client-Id');
     if(!clientId){
-        return res.status(400).json({success: false, message: 'INTERNAL SERVER ERROR: Client Public Key not found'});
-    }
-
-    const {email, password} = req.body;
-    if(!email || !password){
-        return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Missing email or password"});
-    }
-
-    let ownerdb;
-    try {
-        const siteOwnerCredentials = req.db.model('UserCredentials', UserCredentials);
-        ownerdb = await siteOwnerCredentials.findOne({clientPublicKey: clientId});
-        if(!ownerdb){
-            return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin"});
-        }
-        const userProfileInfo = {
-            email,
-            password,
-            authProvider : "local"
-        }
-        // const createUserResponse = await findOrCreate(ownerdb.clientMongoDbUri, userProfileInfo);
-        
-
-    } catch (error) {
-        
+        return res.status(400).s
     }
 });
 //---------------------------------------------------------------------------------------------------------------------------------------------

@@ -246,10 +246,9 @@ router.post('/local/signin', async(req, res)=>{
         const userProfileInfo = {
             email,
             password,
-            authProvider : "local"
+            authProvider = "local"
         }
-        // const createUserResponse = await findOrCreate(ownerdb.clientMongoDbUri, userProfileInfo);
-        
+        const createUserResponse = await findOrCreate()
 
     } catch (error) {
         

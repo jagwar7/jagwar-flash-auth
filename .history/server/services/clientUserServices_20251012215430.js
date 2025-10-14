@@ -60,7 +60,6 @@ async function findOrCreate(clientMongodbUri, userProfile){
 
     if(user) {
         if(userProfile.authProvider === "local"){
-            
             const resObj = {
                 success: false,
                 message: "User already exists. Please sign in"

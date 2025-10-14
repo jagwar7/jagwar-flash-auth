@@ -172,7 +172,7 @@ router.post('/local/signup', async(req, res)=>{
 
     let ownerdb;
     try {
-        const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);    // FIND CLIENT's USER COLLECTION
+        const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);    // 
         ownerdb = await userCredentialCollection.findOne({clientPublicKey: clientId});
 
         if(!ownerdb){
@@ -187,7 +187,7 @@ router.post('/local/signup', async(req, res)=>{
             authProvider: "local"
         }
 
-        const createOrUpdateInDb = await findOrCreate(ownerdb.clientMongoDbUri, userProfile);  // TRY CREATE NEW USER  
+        const createOrUpdateInDb = await findOrCreate(ownerdb.clientMongoDbUri, userProfile);    
 
         // USER WILL BE CREATED OR CHECKED IF ALREADY EXISTS
         if(createOrUpdateInDb.success === false){
@@ -220,39 +220,6 @@ router.post('/local/signup', async(req, res)=>{
                     window.close();
                 </script>
         `);
-    }
-});
-
-
-
-router.post('/local/signin', async(req, res)=>{
-    const clientId = req.header('X-Client-Id');
-    if(!clientId){
-        return res.status(400).json({success: false, message: 'INTERNAL SERVER ERROR: Client Public Key not found'});
-    }
-
-    const {email, password} = req.body;
-    if(!email || !password){
-        return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Missing email or password"});
-    }
-
-    let ownerdb;
-    try {
-        const siteOwnerCredentials = req.db.model('UserCredentials', UserCredentials);
-        ownerdb = await siteOwnerCredentials.findOne({clientPublicKey: clientId});
-        if(!ownerdb){
-            return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin"});
-        }
-        const userProfileInfo = {
-            email,
-            password,
-            authProvider : "local"
-        }
-        // const createUserResponse = await findOrCreate(ownerdb.clientMongoDbUri, userProfileInfo);
-        
-
-    } catch (error) {
-        
     }
 });
 //---------------------------------------------------------------------------------------------------------------------------------------------

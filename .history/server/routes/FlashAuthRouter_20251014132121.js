@@ -243,12 +243,7 @@ router.post('/local/signin', async(req, res)=>{
         if(!ownerdb){
             return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin"});
         }
-        const userProfileInfo = {
-            email,
-            password,
-            authProvider : "local"
-        }
-        // const createUserResponse = await findOrCreate(ownerdb.clientMongoDbUri, userProfileInfo);
+
         
 
     } catch (error) {
