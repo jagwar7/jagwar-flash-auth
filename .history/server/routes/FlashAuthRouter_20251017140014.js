@@ -265,8 +265,8 @@ router.post('/local/signin', async(req, res)=>{
         }
 
         const userObj = {
-            name : signInResponse.data.name,
-            email: signInResponse.data.email,
+            name : signInResponse.name,
+            email: signInResponse.email,
             authProvider: "local"
         }
         const flashToken = jwt.sign(userObj, process.env.JWT_SECRET_KEY, {expiresIn: siteData.tokenExpiryDuration});
@@ -301,7 +301,7 @@ router.get('/fetch/profile', async(req, res)=>{
     }
 
     const token = req.header('Authorization')?.replace("local:", "");
-    console.log(token);
+    console.log(token)
     if(!token){
         return res.status(400).json({success: false, msg: "CLIENT ERRROR: Missing Auth Token, Please sign in"});
     }
@@ -309,8 +309,7 @@ router.get('/fetch/profile', async(req, res)=>{
     let siteData;
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        console.log(decodedToken);
-        if(!decodedToken){
+        if(!decodedToken.email){
             return res.status(400).json({success: false, message: "CLIENT ERROR: Invalid Token, Please sign in"});
         }
 

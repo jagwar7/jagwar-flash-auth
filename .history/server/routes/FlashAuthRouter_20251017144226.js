@@ -266,7 +266,7 @@ router.post('/local/signin', async(req, res)=>{
 
         const userObj = {
             name : signInResponse.data.name,
-            email: signInResponse.data.email,
+            email: signInResponse.email,
             authProvider: "local"
         }
         const flashToken = jwt.sign(userObj, process.env.JWT_SECRET_KEY, {expiresIn: siteData.tokenExpiryDuration});

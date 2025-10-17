@@ -76,7 +76,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
     }
     const modifiedUser = {
         ...userProfile,
-        flashAuthId: crypto.randomUUID()
+         flashAuthId: crypto.randomUUID()
     };
     
     // CREATE NEW USER IF DOESNT EXIST 

@@ -44,7 +44,7 @@ async function getClientConnection(uri){
 
 
 
-// FIND OR CREAETE USER IN CLITNT'S DB
+
 async function findOrCreate(clientMongodbUri, userProfile){
     const connection = await getClientConnection(clientMongodbUri);
     if(!connection){
@@ -75,8 +75,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
        return resObj;
     }
     const modifiedUser = {
-        ...userProfile,
-        flashAuthId: crypto.randomUUID()
+        ...userProfile, flashAuthId: crypto.randomUUID()
     };
     
     // CREATE NEW USER IF DOESNT EXIST 
@@ -114,14 +113,12 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
     if(!user){
         resObj.success = false;
         resObj.message = "CLIENT SIDE ERROR: User does not exist, Please sign up";
-        resObj.data = null;
         return resObj;
     }
 
     if(user && user.authProvider != "local"){
         resObj.success = false;
         resObj.message = "CLIENT SIDE ERROR: You have signed up with Google Or Github."
-        resObj.data = null;
         return resObj;
     }
     
@@ -129,7 +126,6 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
     if(!isPasswordMatched){
         resObj.success = false;
         resObj.message = "CLIENT SIDE ERROR: Incorrect Password";
-        resObj.data = null;
         return resObj;
     }
 
