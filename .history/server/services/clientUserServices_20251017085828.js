@@ -166,16 +166,6 @@ async function FetchProfile(clientMongoDbUri, userProfile){
     const userColletions = connection.model('user', defaultUserSchema);
     const user = await userColletions.findOne({email: userProfile.email});
 
-    if(!user){
-        resObj.success = false;
-        resObj.message = "CLIENT ERROR: User does not exist, Please sign up";
-        resObj.data = null;
-        return resObj;
-    }
-
-    resObj.success = true;
-    resObj.message = "Successfully fetched user profile";
-    resObj.data = user;
-    return resObj;
+    if(!user)
 }
-module.exports = {findOrCreate, TryLocalSignin, FetchProfile};
+module.exports = {findOrCreate, TryLocalSignin};

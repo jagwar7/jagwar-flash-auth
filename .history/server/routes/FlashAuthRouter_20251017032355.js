@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const {OAuth2Client} = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const {RedirectURL}  = require('../utils/constants.js');
-const { findOrCreate, TryLocalSignin, FetchProfile} = require('../services/clientUserServices.js');
+const { findOrCreate, TryLocalSignin} = require('../services/clientUserServices.js');
 const { UserCredentials } = require('../models/UserCredentials.model.js');
 
 
@@ -288,9 +288,9 @@ router.post('/local/signin', async(req, res)=>{
  * LOGIC: REQUIRED FILDS: CLIENT ID AS WELLL AS AUTH TOKEN
  */
 
-router.get('/fetch/profile', async(req, res)=>{
-    const clientId = req.header('X-Client-Id');
-    if(!clientId){
+router.get('/fetch/profile', (req, res)=>{
+    const ClientId = req.header('X-Client-Id');
+    if(!ClientId){
         return res.status(400).json({success: false, msg: "CLIENT ERROR: Missing client public key, Contact Admin"});
     }
 
@@ -307,28 +307,14 @@ router.get('/fetch/profile', async(req, res)=>{
         }
 
         const userCredentialCollections = req.db.model('UserCredentials', UserCredentials);
-        siteData = await userCredentialCollections.findOne({clientPublicKey: clientId});
-
+        siteData = await userCredentialCollections.findOne({clientPublicKey: clie});
         if(!siteData){
-            return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin"});
+            return res.status(400).json({success: false, message: "INTERNAL SERVER"})
         }
-        
-        const userProfile = {
-            email: decodedToken.email
-        }
-
-        const fetchProfileResponse = await FetchProfile(siteData.clientMongoDbUri, userProfile);
-        if(fetchProfileResponse.success == false){
-            return res.status(400).json(fetchProfileResponse);
-        }
-
-        // SUCCESSFULLY FETCHED
-        return res.status(200).json(fetchProfileResponse);
-
     } catch (error) {
-        return res.status(400).json({success: false, message: "UNKNOWN SERVER ERROR: Contact Admin"});
+        
     }
-});
+})
 
 
 module.exports = router;

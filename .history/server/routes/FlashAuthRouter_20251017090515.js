@@ -323,12 +323,12 @@ router.get('/fetch/profile', async(req, res)=>{
         }
 
         // SUCCESSFULLY FETCHED
-        return res.status(200).json(fetchProfileResponse);
+        return res.status(200).send(fetchProfileResponse);
 
     } catch (error) {
-        return res.status(400).json({success: false, message: "UNKNOWN SERVER ERROR: Contact Admin"});
+        return res.status(400).
     }
-});
+})
 
 
 module.exports = router;

@@ -178,4 +178,4 @@ async function FetchProfile(clientMongoDbUri, userProfile){
     resObj.data = user;
     return resObj;
 }
-module.exports = {findOrCreate, TryLocalSignin, FetchProfile};
+module.exports = {findOrCreate, TryLocalSignin};

@@ -175,7 +175,6 @@ async function FetchProfile(clientMongoDbUri, userProfile){
 
     resObj.success = true;
     resObj.message = "Successfully fetched user profile";
-    resObj.data = user;
-    return resObj;
+    
 }
-module.exports = {findOrCreate, TryLocalSignin, FetchProfile};
+module.exports = {findOrCreate, TryLocalSignin};

@@ -314,21 +314,15 @@ router.get('/fetch/profile', async(req, res)=>{
         }
         
         const userProfile = {
-            email: decodedToken.email
+            email: 
         }
 
-        const fetchProfileResponse = await FetchProfile(siteData.clientMongoDbUri, userProfile);
-        if(fetchProfileResponse.success == false){
-            return res.status(400).json(fetchProfileResponse);
-        }
-
-        // SUCCESSFULLY FETCHED
-        return res.status(200).json(fetchProfileResponse);
+        const fetchProfileResponse = await FetchProfile(siteData.clientMongoDbUri, )
 
     } catch (error) {
-        return res.status(400).json({success: false, message: "UNKNOWN SERVER ERROR: Contact Admin"});
+        
     }
-});
+})
 
 
 module.exports = router;

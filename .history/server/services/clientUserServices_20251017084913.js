@@ -141,41 +141,5 @@ async function TryLocalSignin(clientMongodbUri, userProfile){
 
 
 // FETCH USER PROFILE -----------------------------------------------------------------------------------------------
-async function FetchProfile(clientMongoDbUri, userProfile){
-    const connection = await getClientConnection(clientMongoDbUri);
-    const resObj = {
-        success: undefined,
-        message: undefined,
-        data:    undefined
-    }
-    
-    if(!connection){
-        resObj.success = false;
-        resObj.message = "INTERNAL SERVER ERROR: Faild to connect database, Contact Admin";
-        resObj.data = null
-        return resObj;
-    }
 
-    if(!userProfile.email){
-        resObj.success = false;
-        resObj.message = "CLIENT ERROR: Invalid user token, Please sign in";
-        resObj.data = null;
-        return resObj;
-    }
-
-    const userColletions = connection.model('user', defaultUserSchema);
-    const user = await userColletions.findOne({email: userProfile.email});
-
-    if(!user){
-        resObj.success = false;
-        resObj.message = "CLIENT ERROR: User does not exist, Please sign up";
-        resObj.data = null;
-        return resObj;
-    }
-
-    resObj.success = true;
-    resObj.message = "Successfully fetched user profile";
-    resObj.data = user;
-    return resObj;
-}
-module.exports = {findOrCreate, TryLocalSignin, FetchProfile};
+module.exports = {findOrCreate, TryLocalSignin};

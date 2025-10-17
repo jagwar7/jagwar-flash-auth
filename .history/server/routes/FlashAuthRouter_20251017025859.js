@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const {OAuth2Client} = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const {RedirectURL}  = require('../utils/constants.js');
-const { findOrCreate, TryLocalSignin, FetchProfile} = require('../services/clientUserServices.js');
+const { findOrCreate, TryLocalSignin} = require('../services/clientUserServices.js');
 const { UserCredentials } = require('../models/UserCredentials.model.js');
 
 
@@ -16,7 +16,7 @@ router.get('/google/url', async(req, res)=>{
     try {
         const clientId = req.header('X-Client-ID');
         if(!clientId){
-            return res.status(400).json({success: false, message: "CLIENT ERROR: Missing client public key, Contact Admin"});
+            return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Missing Client Public Key, Contact Admin"});
         }
 
         // FIND USER CREDENTIALS 
@@ -72,11 +72,11 @@ router.get('/google/callback', async(req, res)=>{
             return res.status(400).send({success: false, msg: "INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin"});
         }
         
-        const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
+        const userCredentialCollection = req.db.model('UserCredentials', UserCredentials)
         const siteData = userCredentialCollection.findOne({clientPublicKey: state});     // GET SITE OWNER's INFORMATION
 
         if(!siteData){
-            return res.status(400).send({success: false, msg: "INTERNAL SERVER ERROR: Site data not found, Contact Admin"});
+            return res.status(400).send({success: false, msg: "INTERNAL SERVER ERROR: Missing/Invlid client ID"});
         }
         
         const {googleClientId, googleClientSecret, clientMongoDbUri} = siteData;
@@ -161,12 +161,12 @@ router.post('/local/signup', async(req, res)=>{
     const clientId = req.header('X-Client-Id'); 
 
     if(!clientId){
-        return res.status(400).json({success: false, message: "CLIENT ERROR: Missing client public key, Contact Admin"});
+        return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Missing/Invalid client ID, Contact Admin"});
     }
 
     const {name, email, password} = req.body;
     if(!name || !email || !password){
-        return res.status(400).json({success: false, message: "CLIENT ERROR: All the fields are required"});
+        return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: All the fields are required"});
     }
 
     let siteData;
@@ -175,7 +175,7 @@ router.post('/local/signup', async(req, res)=>{
         siteData = await userCredentialCollection.findOne({clientPublicKey: clientId});
 
         if(!siteData){
-            return res.status(400).json({message: "INTERNAL SERVER ERROR: Site data not found, Contact Admin"});
+            return res.status(400).json({message: "INTERNAL SERVER ERROR: Site could not recognized"});
         }
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -238,7 +238,7 @@ router.post('/local/signup', async(req, res)=>{
 router.post('/local/signin', async(req, res)=>{
     const clientId = req.header('X-Client-Id');
     if(!clientId){
-        return res.status(400).json({success: false, message: 'CLIENT ERROR: Missing client public key, Contact Admin'});
+        return res.status(400).json({success: false, message: 'INTERNAL SERVER ERROR: Client Public Key not found'});
     }
 
     const {email, password, authType} = req.body;
@@ -272,63 +272,6 @@ router.post('/local/signin', async(req, res)=>{
 });
 //---------------------------------------------------------------------------------------------------------------------------------------------
 
-
-
-
-
-
-
-
-
-
-
-
-// FETCH USER PROFILE--------------------------------------------------------------------------------------------------------------------------
-/**
- * LOGIC: REQUIRED FILDS: CLIENT ID AS WELLL AS AUTH TOKEN
- */
-
-router.get('/fetch/profile', async(req, res)=>{
-    const clientId = req.header('X-Client-Id');
-    if(!clientId){
-        return res.status(400).json({success: false, msg: "CLIENT ERROR: Missing client public key, Contact Admin"});
-    }
-
-    const token = req.header('Authorization')?.replace("local", "");
-    if(!token){
-        return res.status(400).json({success: false, msg: "CLIENT ERRROR: Missing Auth Token, Please sign in"});
-    }
-
-    let siteData;
-    try {
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-        if(!decodedToken.email){
-            return res.status(400).json({success: false, message: "CLIENT ERROR: Invalid Token, Please sign in"});
-        }
-
-        const userCredentialCollections = req.db.model('UserCredentials', UserCredentials);
-        siteData = await userCredentialCollections.findOne({clientPublicKey: clientId});
-
-        if(!siteData){
-            return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin"});
-        }
-        
-        const userProfile = {
-            email: decodedToken.email
-        }
-
-        const fetchProfileResponse = await FetchProfile(siteData.clientMongoDbUri, userProfile);
-        if(fetchProfileResponse.success == false){
-            return res.status(400).json(fetchProfileResponse);
-        }
-
-        // SUCCESSFULLY FETCHED
-        return res.status(200).json(fetchProfileResponse);
-
-    } catch (error) {
-        return res.status(400).json({success: false, message: "UNKNOWN SERVER ERROR: Contact Admin"});
-    }
-});
 
 
 module.exports = router;

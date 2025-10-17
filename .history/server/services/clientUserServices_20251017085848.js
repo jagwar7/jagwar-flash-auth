@@ -168,14 +168,7 @@ async function FetchProfile(clientMongoDbUri, userProfile){
 
     if(!user){
         resObj.success = false;
-        resObj.message = "CLIENT ERROR: User does not exist, Please sign up";
-        resObj.data = null;
-        return resObj;
+        
     }
-
-    resObj.success = true;
-    resObj.message = "Successfully fetched user profile";
-    resObj.data = user;
-    return resObj;
 }
-module.exports = {findOrCreate, TryLocalSignin, FetchProfile};
+module.exports = {findOrCreate, TryLocalSignin};
