@@ -180,7 +180,6 @@ return res.send(`
       font-family: 'Archivo', sans-serif;
       letter-spacing: 1px;
       background: linear-gradient(180deg, #ff4500 0%, #ff7a4d 100%);
-      -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }

@@ -135,361 +135,487 @@ router.get('/google/callback', async(req, res)=>{
 //------------------------------------------------------
            // ✅ SUCCESS RESPONSE
 return res.send(`
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlashAuth Success</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;1,500&display=swap" rel="stylesheet">
+  <title>Flash Auth</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
-    html, body {
-      height: 100%;
+    body {
       margin: 0;
-      background: #0f172a;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e, #2a2a40);
+      overflow: hidden;
+      font-family: "Poppins", Arial, sans-serif;
     }
 
-    .window{
-      height: 40rem;
-      width: 30rem;
-      background : linear-gradient(135deg, #3B0D6F 0%, #22083b 50%, #260b4a 100%);
+    .container {
+      position: relative;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .phone {
+      width: 320px;
+      height: 640px;
+      background: #111;
+      border-radius: 35px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      position: relative;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a2e, #3b2f63);
+      position: relative;
+      animation: bgMove 5s infinite alternate;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: left top; }
+      100% { background-position: right bottom; }
+    }
+
+    .status-bar {
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
-      align-items: center;
-      position: relative;
-      border-radius: 18px;
+      padding: 10px 15px;
+      color: #b0b0ff;
+      font-size: 13px;
     }
 
-    /* ✅ Brand FIXED */
-    .brand {
+    .content {
+      text-align: center;
+      padding-top: 50px;
+      color: #fff;
       position: relative;
-      top: 25px; /* ✅ brand moved down */
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      z-index: 50;
     }
 
-    .gradient-text {
-      font-weight: 900;
-      font-style: italic;
-      font-family: 'Archivo', sans-serif;
-      letter-spacing: 1px;
-      background: linear-gradient(180deg, #ff4500 0%, #ff7a4d 100%);
+    h1 {
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1;
+      background: linear-gradient(90deg, #00d4ff, #a855f7);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
+      letter-spacing: 1px;
+      animation: glowText 2s infinite alternate;
     }
 
-    .brand-text {
-      font-size: 1.75rem;
+    @keyframes glowText {
+      0% { text-shadow: 0 0 5px #00d4ff; }
+      100% { text-shadow: 0 0 20px #a855f7; }
     }
 
-    /* ✅ AUTH + by jagwar stacked properly */
-    .brand-text-group {
-      display: flex;
-      flex-direction: column;
-      margin-top: -2px;
-      line-height: 1.05rem;
-      padding-top: 8px;
-    }
-
-    .auth-text {
-      font-size: 1.75rem;
-    }
-
-    .by-text {
-      font-size: 0.6rem;
-      font-weight: 600;
-      padding-left: 2px;
-      margin-top: -2px;
-      opacity: 0.9;
-    }
-
-    .brand-icon-svg {
-      width: 42px;
-      height: 42px;
-      animation: glow 1.5s infinite ease-in-out;
-    }
-
-    @keyframes glow {
-      0%,100% { filter: drop-shadow(0 0 6px rgba(255,69,0,0.6)); }
-      50% { filter: drop-shadow(0 0 20px rgba(255,69,0,1)); }
-    }
-
-    .circle-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 250px;
-      height: 250px;
+    .checkmark-circle {
+      margin: 40px auto;
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle, #00d4ff, #6a00ff);
       border-radius: 50%;
-      border: 6px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.01);
-      box-shadow: 0 8px 24px rgba(2,6,23,0.6),
-                  0 0 10px rgba(34,197,94,0.06);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 25px #00d4ff, 0 0 60px #6a00ff;
+      animation: pulse 2s infinite ease-in-out;
     }
 
-    .checkmark { width: 230px; height: 230px; }
-
-    .circle {
-      stroke: #ff4500;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-dasharray: 260;
-      stroke-dashoffset: 260;
-      animation: circle 1s forwards ease-in-out;
+    .checkmark-circle .fas {
+      font-size: 55px;
+      color: #fff;
     }
-    @keyframes circle { to { stroke-dashoffset: 0; } }
 
-    .check {
-      stroke: #ff4500;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 65;
-      stroke-dashoffset: 65;
-      animation: check 1s forwards ease-in-out;
-      animation-delay: 0.2s;
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 20px #00d4ff; }
+      50% { transform: scale(1.05); box-shadow: 0 0 40px #6a00ff; }
+      100% { transform: scale(1); box-shadow: 0 0 20px #00d4ff; }
     }
-    @keyframes check { to { stroke-dashoffset: 0; } }
 
-    .bottom-area { height: 2rem; }
+    .lightning {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3px;
+      height: 220px;
+      background: linear-gradient(to bottom, #ff00ff, #00d4ff);
+      transform: translate(-50%, -50%);
+      filter: blur(6px);
+      opacity: 0.8;
+      animation: flicker 0.3s infinite alternate;
+    }
 
+    .lightning::before,
+    .lightning::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 100px;
+      background: linear-gradient(to bottom, #ff00ff, #00d4ff);
+      filter: blur(6px);
+    }
+
+    .lightning::before { left: -25px; transform: rotate(20deg); }
+    .lightning::after { right: -25px; transform: rotate(-20deg); }
+
+    @keyframes flicker {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    p {
+      font-size: 18px;
+      color: #b0b0ff;
+      margin: 25px 0 15px 0;
+    }
+
+    .action-btn {
+      background: linear-gradient(90deg, #3a3a60, #4b4b90);
+      border: none;
+      padding: 12px 25px;
+      color: #00d4ff;
+      font-size: 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: 0.3s;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(90deg, #4b4b90, #5c5ca0);
+      box-shadow: 0 0 15px #00d4ff;
+    }
+
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      color: #b0b0ff;
+      font-size: 13px;
+    }
+
+    .bottom-bar i { color: #b0b0ff; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Optional close animation hint */
+    .close-hint {
+      position: absolute;
+      bottom: 80px;
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      color: #aaaaff;
+      animation: fadeBlink 1.5s infinite;
+    }
+
+    @keyframes fadeBlink {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
   </style>
 </head>
-
 <body>
-  <div class="window">
-    <div class="brand">
-      <span class="brand-text gradient-text">FLASH</span>
-
-      <svg class="brand-icon-svg" viewBox="0 0 1024 1024">
-        <defs>
-          <linearGradient id="brandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ff4500" />
-            <stop offset="100%" stop-color="#ff7a4d" />
-          </linearGradient>
-        </defs>
-        <path d="M704 469.333333h-200.533333L640 106.666667H405.333333l-128 448h183.466667L362.666667 960z" fill="url(#brandGradient)" />
-      </svg>
-
-      <span class="brand-text-group">
-        <span class="auth-text gradient-text">AUTH</span>
-        <span class="by-text gradient-text">by JAGWAR</span>
-      </span>
+  <div class="container">
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>6:00</span>
+          <span><i class="fas fa-signal"></i> <i class="fas fa-battery-full"></i></span>
+        </div>
+        <div class="content">
+          <h1>Flash<br>Auth</h1>
+          <div class="checkmark-circle">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="lightning"></div>
+          <p>Authentication Successful!</p>
+          <button class="action-btn" id="close-btn">Close</button>
+        </div>
+        <div class="close-hint">Closing automatically in 3s...</div>
+        <div class="bottom-bar">
+          <i class="fas fa-home"></i>
+          <span>Flash Auth v2.0</span>
+          <i class="fas fa-cog"></i>
+        </div>
+      </div>
     </div>
-
-    <div class="circle-btn">
-      <svg class="checkmark" viewBox="0 0 100 100">
-        <circle class="circle" cx="50" cy="50" r="40" fill="none"/>
-        <path class="check" fill="none" d="M30 50 L45 65 L70 35"/>
-      </svg>
-    </div>
-
-    <div class="bottom-area"></div>
   </div>
 
   <script>
-    if (window.opener) {
-      window.opener.postMessage(
-        { type: "FLASHAUTH_TOKEN", token: "${flashToken}" },
-        "${siteData.clientFrontEndURL}"
-      );
-    }
+    // Send token message to opener
+    window.opener?.postMessage({ type: "FLASHAUTH_TOKEN", token: ${flashToken} }, "*");
 
-    setTimeout(() => { window.close(); }, 10000);
+    // Auto-close after 3 seconds
+    setTimeout(() => window.close(), 3000);
+
+    // Manual close
+    document.getElementById("close-btn").addEventListener("click", () => window.close());
   </script>
 </body>
 </html>
 
 `);
-
 //----------------------------------------------------------------
 
 
 
     } catch (error) {
         // console.error("Google Callback Error:", error);
-return res.send(`
-<!DOCTYPE html>
+        return res.send(`
+  <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlashAuth Success</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;1,500&display=swap" rel="stylesheet">
+  <title>Flash Auth</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <style>
-    html, body {
-      height: 100%;
+    body {
       margin: 0;
-      background: #0f172a;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e, #2a2a40);
+      overflow: hidden;
+      font-family: "Poppins", Arial, sans-serif;
     }
 
-    .window{
-      height: 40rem;
-      width: 30rem;
-      background : linear-gradient(135deg, #3B0D6F 0%, #22083b 50%, #260b4a 100%);
+    .container {
+      position: relative;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .phone {
+      width: 320px;
+      height: 640px;
+      background: #111;
+      border-radius: 35px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      position: relative;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a2e, #3b2f63);
+      position: relative;
+      animation: bgMove 5s infinite alternate;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: left top; }
+      100% { background-position: right bottom; }
+    }
+
+    .status-bar {
       display: flex;
-      flex-direction: column;
       justify-content: space-between;
-      align-items: center;
-      position: relative;
-      border-radius: 18px;
+      padding: 10px 15px;
+      color: #b0b0ff;
+      font-size: 13px;
     }
 
-    /* ✅ Brand FIXED */
-    .brand {
+    .content {
+      text-align: center;
+      padding-top: 50px;
+      color: #fff;
       position: relative;
-      top: 25px; /* ✅ brand moved down */
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      z-index: 50;
     }
 
-    .gradient-text {
-      font-weight: 900;
-      font-style: italic;
-      font-family: 'Archivo', sans-serif;
-      letter-spacing: 1px;
-      background: linear-gradient(180deg, #ff4500 0%, #ff7a4d 100%);
+    h1 {
+      font-size: 42px;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1;
+      background: linear-gradient(90deg, #00d4ff, #a855f7);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
+      letter-spacing: 1px;
+      animation: glowText 2s infinite alternate;
     }
 
-    .brand-text {
-      font-size: 1.75rem;
+    @keyframes glowText {
+      0% { text-shadow: 0 0 5px #00d4ff; }
+      100% { text-shadow: 0 0 20px #a855f7; }
     }
 
-    /* ✅ AUTH + by jagwar stacked properly */
-    .brand-text-group {
-      display: flex;
-      flex-direction: column;
-      margin-top: -2px;
-      line-height: 1.05rem;
-    }
-
-    .auth-text {
-      font-size: 1.75rem;
-    }
-
-    .by-text {
-      font-size: 0.6rem;
-      font-weight: 600;
-      padding-left: 2px;
-      margin-top: -2px;
-      opacity: 0.9;
-    }
-
-    .brand-icon-svg {
-      width: 42px;
-      height: 42px;
-      animation: glow 1.5s infinite ease-in-out;
-    }
-
-    @keyframes glow {
-      0%,100% { filter: drop-shadow(0 0 6px rgba(255,69,0,0.6)); }
-      50% { filter: drop-shadow(0 0 20px rgba(255,69,0,1)); }
-    }
-
-    .circle-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 250px;
-      height: 250px;
+    .checkmark-circle {
+      margin: 40px auto;
+      width: 110px;
+      height: 110px;
+      background: radial-gradient(circle, #00d4ff, #6a00ff);
       border-radius: 50%;
-      border: 6px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.01);
-      box-shadow: 0 8px 24px rgba(2,6,23,0.6),
-                  0 0 10px rgba(34,197,94,0.06);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 25px #00d4ff, 0 0 60px #6a00ff;
+      animation: pulse 2s infinite ease-in-out;
     }
 
-    .checkmark { width: 230px; height: 230px; }
-
-    .circle {
-      stroke: #ff4500;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-dasharray: 260;
-      stroke-dashoffset: 260;
-      animation: circle 1s forwards ease-in-out;
+    .checkmark-circle .fas {
+      font-size: 55px;
+      color: #fff;
     }
-    @keyframes circle { to { stroke-dashoffset: 0; } }
 
-    .check {
-      stroke: #ff4500;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 65;
-      stroke-dashoffset: 65;
-      animation: check 1s forwards ease-in-out;
-      animation-delay: 0.2s;
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 20px #00d4ff; }
+      50% { transform: scale(1.05); box-shadow: 0 0 40px #6a00ff; }
+      100% { transform: scale(1); box-shadow: 0 0 20px #00d4ff; }
     }
-    @keyframes check { to { stroke-dashoffset: 0; } }
 
-    .bottom-area { height: 2rem; }
+    .lightning {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 3px;
+      height: 220px;
+      background: linear-gradient(to bottom, #ff00ff, #00d4ff);
+      transform: translate(-50%, -50%);
+      filter: blur(6px);
+      opacity: 0.8;
+      animation: flicker 0.3s infinite alternate;
+    }
 
+    .lightning::before,
+    .lightning::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 100px;
+      background: linear-gradient(to bottom, #ff00ff, #00d4ff);
+      filter: blur(6px);
+    }
+
+    .lightning::before { left: -25px; transform: rotate(20deg); }
+    .lightning::after { right: -25px; transform: rotate(-20deg); }
+
+    @keyframes flicker {
+      0% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    p {
+      font-size: 18px;
+      color: #b0b0ff;
+      margin: 25px 0 15px 0;
+    }
+
+    .action-btn {
+      background: linear-gradient(90deg, #3a3a60, #4b4b90);
+      border: none;
+      padding: 12px 25px;
+      color: #00d4ff;
+      font-size: 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: 0.3s;
+    }
+
+    .action-btn:hover {
+      background: linear-gradient(90deg, #4b4b90, #5c5ca0);
+      box-shadow: 0 0 15px #00d4ff;
+    }
+
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      color: #b0b0ff;
+      font-size: 13px;
+    }
+
+    .bottom-bar i { color: #b0b0ff; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Optional close animation hint */
+    .close-hint {
+      position: absolute;
+      bottom: 80px;
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      color: #aaaaff;
+      animation: fadeBlink 1.5s infinite;
+    }
+
+    @keyframes fadeBlink {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
   </style>
 </head>
-
 <body>
-  <div class="window">
-    <div class="brand">
-      <span class="brand-text gradient-text">FLASH</span>
-
-      <svg class="brand-icon-svg" viewBox="0 0 1024 1024">
-        <defs>
-          <linearGradient id="brandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ff4500" />
-            <stop offset="100%" stop-color="#ff7a4d" />
-          </linearGradient>
-        </defs>
-        <path d="M704 469.333333h-200.533333L640 106.666667H405.333333l-128 448h183.466667L362.666667 960z" fill="url(#brandGradient)" />
-      </svg>
-
-      <span class="brand-text-group">
-        <span class="auth-text gradient-text">AUTH</span>
-        <span class="by-text gradient-text">by JAGWAR</span>
-      </span>
+  <div class="container">
+    <div class="phone">
+      <div class="screen">
+        <div class="status-bar">
+          <span>6:00</span>
+          <span><i class="fas fa-signal"></i> <i class="fas fa-battery-full"></i></span>
+        </div>
+        <div class="content">
+          <h1>Flash<br>Auth</h1>
+          <div class="checkmark-circle">
+            <i class="fas fa-check"></i>
+          </div>
+          <div class="lightning"></div>
+          <p>Authentication Successful!</p>
+          <button class="action-btn" id="close-btn">Close</button>
+        </div>
+        <div class="close-hint">Closing automatically in 3s...</div>
+        <div class="bottom-bar">
+          <i class="fas fa-home"></i>
+          <span>Flash Auth v2.0</span>
+          <i class="fas fa-cog"></i>
+        </div>
+      </div>
     </div>
-
-    <div class="circle-btn">
-      <svg class="checkmark" viewBox="0 0 100 100">
-        <circle class="circle" cx="50" cy="50" r="40" fill="none"/>
-        <path class="check" fill="none" d="M30 50 L45 65 L70 35"/>
-      </svg>
-    </div>
-
-    <div class="bottom-area"></div>
   </div>
 
   <script>
-    if (window.opener) {
-      window.opener.postMessage(
-        { type: "FLASHAUTH_TOKEN", token: "${flashToken}" },
-        "${siteData.clientFrontEndURL}"
-      );
-    }
+    // Send token message to opener
+    window.opener?.postMessage({ type: "FLASHAUTH_TOKEN", token: ${flashToken} }, "*");
 
-    setTimeout(() => { window.close(); }, 10000);
+    // Auto-close after 3 seconds
+    setTimeout(() => window.close(), 3000);
+
+    // Manual close
+    document.getElementById("close-btn").addEventListener("click", () => window.close());
   </script>
 </body>
 </html>
 
-
 `);
-
 
     }
 });

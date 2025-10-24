@@ -195,7 +195,6 @@ return res.send(`
       flex-direction: column;
       margin-top: -2px;
       line-height: 1.05rem;
-      padding-top: 8px;
     }
 
     .auth-text {

@@ -138,174 +138,146 @@ return res.send(`
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FlashAuth Success</title>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;1,500&display=swap" rel="stylesheet">
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      background: #0f172a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlashAuth Success</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #1b0033;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
     }
 
-    .window{
-      height: 40rem;
-      width: 30rem;
-      background : linear-gradient(135deg, #3B0D6F 0%, #22083b 50%, #260b4a 100%);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      border-radius: 18px;
+    .window {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(180deg, #2a0057, #150033);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
     }
 
-    /* ✅ Brand FIXED */
     .brand {
-      position: relative;
-      top: 25px; /* ✅ brand moved down */
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      z-index: 50;
+        margin-top: 40px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .gradient-text {
-      font-weight: 900;
-      font-style: italic;
-      font-family: 'Archivo', sans-serif;
-      letter-spacing: 1px;
-      background: linear-gradient(180deg, #ff4500 0%, #ff7a4d 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+    .flash,
+    .auth {
+        font-size: 32px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #ff4d00, #ffa600);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
-    .brand-text {
-      font-size: 1.75rem;
+    .flash {
+        margin-right: 4px;
     }
 
-    /* ✅ AUTH + by jagwar stacked properly */
-    .brand-text-group {
-      display: flex;
-      flex-direction: column;
-      margin-top: -2px;
-      line-height: 1.05rem;
-      padding-top: 8px;
+    .auth {
+        margin-left: 4px;
     }
 
-    .auth-text {
-      font-size: 1.75rem;
+    .bolt {
+        font-size: 32px;
+        font-weight: bold;
+        background: linear-gradient(90deg, #ff4d00, #ffa600);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-top: 2px;
     }
 
-    .by-text {
-      font-size: 0.6rem;
-      font-weight: 600;
-      padding-left: 2px;
-      margin-top: -2px;
-      opacity: 0.9;
+    .by-jagwar {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        text-align: right;
+        margin-top: 6px;
+        margin-left: 95px;
+        background: linear-gradient(90deg, #ff4d00, #ffa600);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
 
-    .brand-icon-svg {
-      width: 42px;
-      height: 42px;
-      animation: glow 1.5s infinite ease-in-out;
+    .success-container {
+        margin-top: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
-    @keyframes glow {
-      0%,100% { filter: drop-shadow(0 0 6px rgba(255,69,0,0.6)); }
-      50% { filter: drop-shadow(0 0 20px rgba(255,69,0,1)); }
+    .circle-border {
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        border: 8px solid rgba(255, 77, 0, 0.4);
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
-
-    .circle-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 250px;
-      height: 250px;
-      border-radius: 50%;
-      border: 6px solid rgba(255,255,255,0.06);
-      background: rgba(255,255,255,0.01);
-      box-shadow: 0 8px 24px rgba(2,6,23,0.6),
-                  0 0 10px rgba(34,197,94,0.06);
-    }
-
-    .checkmark { width: 230px; height: 230px; }
 
     .circle {
-      stroke: #ff4500;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-dasharray: 260;
-      stroke-dashoffset: 260;
-      animation: circle 1s forwards ease-in-out;
+        width: 210px;
+        height: 210px;
+        border-radius: 50%;
+        border: 16px solid #ff3300;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
-    @keyframes circle { to { stroke-dashoffset: 0; } }
 
-    .check {
-      stroke: #ff4500;
-      stroke-width: 8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-dasharray: 65;
-      stroke-dashoffset: 65;
-      animation: check 1s forwards ease-in-out;
-      animation-delay: 0.2s;
+    .tick {
+        font-size: 95px;
+        font-weight: bold;
+        color: #ff3300;
     }
-    @keyframes check { to { stroke-dashoffset: 0; } }
-
-    .bottom-area { height: 2rem; }
-
-  </style>
+</style>
 </head>
-
 <body>
-  <div class="window">
+
+<div class="window">
     <div class="brand">
-      <span class="brand-text gradient-text">FLASH</span>
-
-      <svg class="brand-icon-svg" viewBox="0 0 1024 1024">
-        <defs>
-          <linearGradient id="brandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#ff4500" />
-            <stop offset="100%" stop-color="#ff7a4d" />
-          </linearGradient>
-        </defs>
-        <path d="M704 469.333333h-200.533333L640 106.666667H405.333333l-128 448h183.466667L362.666667 960z" fill="url(#brandGradient)" />
-      </svg>
-
-      <span class="brand-text-group">
-        <span class="auth-text gradient-text">AUTH</span>
-        <span class="by-text gradient-text">by JAGWAR</span>
-      </span>
+        <span class="flash">FLASH</span>
+        <span class="bolt">⚡</span>
+        <span class="auth">AUTH</span>
     </div>
+    <span class="by-jagwar">by JAGWAR</span>
 
-    <div class="circle-btn">
-      <svg class="checkmark" viewBox="0 0 100 100">
-        <circle class="circle" cx="50" cy="50" r="40" fill="none"/>
-        <path class="check" fill="none" d="M30 50 L45 65 L70 35"/>
-      </svg>
+    <div class="success-container">
+        <div class="circle-border">
+            <div class="circle">
+                <span class="tick">✔</span>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="bottom-area"></div>
-  </div>
+<script>
+    // Send token back to SDK
+    window.opener.postMessage({
+        type: "FLASHAUTH_TOKEN",
+        token: "{{TOKEN_PLACEHOLDER}}"
+    }, "*");
 
-  <script>
-    if (window.opener) {
-      window.opener.postMessage(
-        { type: "FLASHAUTH_TOKEN", token: "${flashToken}" },
-        "${siteData.clientFrontEndURL}"
-      );
-    }
+    // Close popup after SDK receives it
+    setTimeout(() => {
+        window.close();
+    }, 10000);
+</script>
 
-    setTimeout(() => { window.close(); }, 10000);
-  </script>
 </body>
 </html>
+
 
 `);
 
