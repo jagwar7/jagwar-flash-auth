@@ -163,6 +163,7 @@ router.get('/google/callback', async(req, res)=>{
 
         //----------------------------------------------------------------
         // ✅ SUCCESS RESPONSE
+        console.log("AUTH SUCCESS: ", flashToken);
         return res.set('Content-Type', 'text/html').send(renderHTML);
         //----------------------------------------------------------------
 

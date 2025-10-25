@@ -22,16 +22,6 @@ const router = express.Router();
 
 
 
-//RESPONSE PAGE HELPER------------------------------------------------------------------------------------------------
-const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
-  return errorPage.replace('{{errorMessage}}', message).replace('{{clientFrontEndURL}}', clientFrontEndURL);
-}
-//--------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
 // GET: SEND GOOGLE AUTH URL ---> FLASHAUTH-SDK
 router.get('/google/url', async(req, res)=>{
     const clientPublicKey = req.header('X-Client-Id');
@@ -91,23 +81,20 @@ router.get('/google/url', async(req, res)=>{
 
 
 
-let renderHTML;
 
 //  GOOGLE AUTH RESPONSE AFTER USER ATTTEMPTS TO LOGIN VIA GOOGLE-------------------------------------------------------------------------------------------
 router.get('/google/callback', async(req, res)=>{
     try {
         const {code, state} = req.query;                                     // NO AUTH CODE OR CLIENT PUBLIC KEY --> CANCEL
         if(!code || !state){
-            renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.status(400).send({success: false, msg: "INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin"});
         }
         
         const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
         const siteData = await userCredentialCollection.findOne({clientPublicKey: state});     // GET SITE OWNER's INFORMATION
 
         if(!siteData){
-            renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: Site data not found, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.status(400).send({success: false, msg: "INTERNAL SERVER ERROR: Site data not found, Contact Admin"});
         }
         
         const {googleClientId, googleClientSecret, clientMongoDbUri} = siteData;
@@ -145,11 +132,9 @@ router.get('/google/callback', async(req, res)=>{
 
 
         // ----------------------------------------------------------------------------------
-        // TRY CRAETE / UPDATE USER IN CLIENT's MONGODB
         const createOrUpdateInDb = await findOrCreate(clientMongoDbUri,userProfile);
         if(createOrUpdateInDb == false){
-            renderHTML = formatErrorInHtml(createOrUpdateInDb.message, siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.status(400).json({success: false, msg: createOrUpdateInDb.message});
         }
         //-----------------------------------------------------------------------------------
 
@@ -157,22 +142,194 @@ router.get('/google/callback', async(req, res)=>{
             expiresIn: siteData.tokenExpiryDuration,
         });
 
-        renderHTML = successPage.replace('{{flashToken}}', flashToken).replace('{{clientFrontEndURL}}', siteData.clientFrontEndURL);
-
-
-
+        const renderHTML = successPage.replace('{{flashToken}}', flashToken).replace('{{clientFrontEndURL}}', siteData.clientFrontEndURL);
+        const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
+          failurePage.replace('{{errorMessage}}', message).replace('{{clientFrontEndURL}}', siteData.clientFrontEndURL);
+        }
         //----------------------------------------------------------------
         // ✅ SUCCESS RESPONSE
-        return res.set('Content-Type', 'text/html').send(renderHTML);
+        return res.send(renderHTML);
         //----------------------------------------------------------------
 
 
     } catch (error) {
-        renderHTML = formatErrorInHtml('INTERNAL SERVER ERROR: There is a technical error, Contact Admin',
-        siteData?.clientFrontEndURL || '',
-        failurePage
-        );
-        return res.set('Content-Type', 'text/html').send(renderHTML);
+        // console.error("Google Callback Error:", error);
+return res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlashAuth Success</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;1,500&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .window{
+      height: 40rem;
+      width: 30rem;
+      background : linear-gradient(135deg, #3B0D6F 0%, #22083b 50%, #260b4a 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      border-radius: 18px;
+    }
+
+    /* ✅ Brand FIXED */
+    .brand {
+      position: relative;
+      top: 25px; /* ✅ brand moved down */
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      z-index: 50;
+    }
+
+    .gradient-text {
+      font-weight: 900;
+      font-style: italic;
+      font-family: 'Archivo', sans-serif;
+      letter-spacing: 1px;
+      background: linear-gradient(180deg, #ff4500 0%, #ff7a4d 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .brand-text {
+      font-size: 1.75rem;
+    }
+
+    /* ✅ AUTH + by jagwar stacked properly */
+    .brand-text-group {
+      display: flex;
+      flex-direction: column;
+      margin-top: -2px;
+      line-height: 1.05rem;
+    }
+
+    .auth-text {
+      font-size: 1.75rem;
+    }
+
+    .by-text {
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding-left: 2px;
+      margin-top: -2px;
+      opacity: 0.9;
+    }
+
+    .brand-icon-svg {
+      width: 42px;
+      height: 42px;
+      animation: glow 1.5s infinite ease-in-out;
+    }
+
+    @keyframes glow {
+      0%,100% { filter: drop-shadow(0 0 6px rgba(255,69,0,0.6)); }
+      50% { filter: drop-shadow(0 0 20px rgba(255,69,0,1)); }
+    }
+
+    .circle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      border: 6px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.01);
+      box-shadow: 0 8px 24px rgba(2,6,23,0.6),
+                  0 0 10px rgba(34,197,94,0.06);
+    }
+
+    .checkmark { width: 230px; height: 230px; }
+
+    .circle {
+      stroke: #ff4500;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 260;
+      stroke-dashoffset: 260;
+      animation: circle 1s forwards ease-in-out;
+    }
+    @keyframes circle { to { stroke-dashoffset: 0; } }
+
+    .check {
+      stroke: #ff4500;
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-dasharray: 65;
+      stroke-dashoffset: 65;
+      animation: check 1s forwards ease-in-out;
+      animation-delay: 0.2s;
+    }
+    @keyframes check { to { stroke-dashoffset: 0; } }
+
+    .bottom-area { height: 2rem; }
+
+  </style>
+</head>
+
+<body>
+  <div class="window">
+    <div class="brand">
+      <span class="brand-text gradient-text">FLASH</span>
+
+      <svg class="brand-icon-svg" viewBox="0 0 1024 1024">
+        <defs>
+          <linearGradient id="brandGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#ff4500" />
+            <stop offset="100%" stop-color="#ff7a4d" />
+          </linearGradient>
+        </defs>
+        <path d="M704 469.333333h-200.533333L640 106.666667H405.333333l-128 448h183.466667L362.666667 960z" fill="url(#brandGradient)" />
+      </svg>
+
+      <span class="brand-text-group">
+        <span class="auth-text gradient-text">AUTH</span>
+        <span class="by-text gradient-text">by JAGWAR</span>
+      </span>
+    </div>
+
+    <div class="circle-btn">
+      <svg class="checkmark" viewBox="0 0 100 100">
+        <circle class="circle" cx="50" cy="50" r="40" fill="none"/>
+        <path class="check" fill="none" d="M30 50 L45 65 L70 35"/>
+      </svg>
+    </div>
+
+    <div class="bottom-area"></div>
+  </div>
+
+  <script>
+    if (window.opener) {
+      window.opener.postMessage(
+        { type: "FLASHAUTH_TOKEN", token: "${flashToken}" },
+        "${siteData.clientFrontEndURL}"
+      );
+    }
+
+    setTimeout(() => { window.close(); }, 10000);
+  </script>
+</body>
+</html>
+
+
+`);
+
+
     }
 });
 //----------------------------------------------------------------------------------------------------------------------------------------------

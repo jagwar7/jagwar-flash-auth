@@ -99,7 +99,7 @@ router.get('/google/callback', async(req, res)=>{
         const {code, state} = req.query;                                     // NO AUTH CODE OR CLIENT PUBLIC KEY --> CANCEL
         if(!code || !state){
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.send(renderHTML);
         }
         
         const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
@@ -107,7 +107,7 @@ router.get('/google/callback', async(req, res)=>{
 
         if(!siteData){
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: Site data not found, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.send(renderHTML);
         }
         
         const {googleClientId, googleClientSecret, clientMongoDbUri} = siteData;
@@ -149,7 +149,7 @@ router.get('/google/callback', async(req, res)=>{
         const createOrUpdateInDb = await findOrCreate(clientMongoDbUri,userProfile);
         if(createOrUpdateInDb == false){
             renderHTML = formatErrorInHtml(createOrUpdateInDb.message, siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.set().send(renderHTML);
         }
         //-----------------------------------------------------------------------------------
 
@@ -163,12 +163,14 @@ router.get('/google/callback', async(req, res)=>{
 
         //----------------------------------------------------------------
         // ✅ SUCCESS RESPONSE
+        console.log("AUTH SUCCESS: ", flashToken);
         return res.set('Content-Type', 'text/html').send(renderHTML);
         //----------------------------------------------------------------
 
 
     } catch (error) {
-        renderHTML = formatErrorInHtml('INTERNAL SERVER ERROR: There is a technical error, Contact Admin',
+        renderHTML = formatErrorInHtml(
+        'INTERNAL SERVER ERROR: There is a technical error, Contact Admin',
         siteData?.clientFrontEndURL || '',
         failurePage
         );

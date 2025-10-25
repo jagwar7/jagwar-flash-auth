@@ -99,7 +99,7 @@ router.get('/google/callback', async(req, res)=>{
         const {code, state} = req.query;                                     // NO AUTH CODE OR CLIENT PUBLIC KEY --> CANCEL
         if(!code || !state){
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.send(renderHTML);
         }
         
         const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
@@ -107,7 +107,7 @@ router.get('/google/callback', async(req, res)=>{
 
         if(!siteData){
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: Site data not found, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.send(renderHTML);
         }
         
         const {googleClientId, googleClientSecret, clientMongoDbUri} = siteData;
@@ -163,6 +163,7 @@ router.get('/google/callback', async(req, res)=>{
 
         //----------------------------------------------------------------
         // ✅ SUCCESS RESPONSE
+        console.log("AUTH SUCCESS: ", flashToken);
         return res.set('Content-Type', 'text/html').send(renderHTML);
         //----------------------------------------------------------------
 

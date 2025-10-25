@@ -22,11 +22,11 @@ const router = express.Router();
 
 
 
-//RESPONSE PAGE HELPER------------------------------------------------------------------------------------------------
-const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
-  return errorPage.replace('{{errorMessage}}', message).replace('{{clientFrontEndURL}}', clientFrontEndURL);
-}
-//--------------------------------------------------------------------------------------------------------------------
+//RESPONSE PAGE HELPER-----------------
+        const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
+          return errorPage.replace('{{errorMessage}}', message).replace('{{clientFrontEndURL}}', siteData.clientFrontEndURL);
+        }
+//--------------------------------------
 
 
 
@@ -99,7 +99,7 @@ router.get('/google/callback', async(req, res)=>{
         const {code, state} = req.query;                                     // NO AUTH CODE OR CLIENT PUBLIC KEY --> CANCEL
         if(!code || !state){
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.send(renderHTML);
         }
         
         const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
@@ -107,7 +107,7 @@ router.get('/google/callback', async(req, res)=>{
 
         if(!siteData){
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: Site data not found, Contact Admin", siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.send(renderHTML);
         }
         
         const {googleClientId, googleClientSecret, clientMongoDbUri} = siteData;
@@ -145,11 +145,10 @@ router.get('/google/callback', async(req, res)=>{
 
 
         // ----------------------------------------------------------------------------------
-        // TRY CRAETE / UPDATE USER IN CLIENT's MONGODB
         const createOrUpdateInDb = await findOrCreate(clientMongoDbUri,userProfile);
         if(createOrUpdateInDb == false){
             renderHTML = formatErrorInHtml(createOrUpdateInDb.message, siteData.clientFrontEndURL, failurePage);
-            return res.set('Content-Type', 'text/html').send(renderHTML);
+            return res.send(renderHTML);
         }
         //-----------------------------------------------------------------------------------
 
@@ -159,20 +158,14 @@ router.get('/google/callback', async(req, res)=>{
 
         renderHTML = successPage.replace('{{flashToken}}', flashToken).replace('{{clientFrontEndURL}}', siteData.clientFrontEndURL);
 
-
-
         //----------------------------------------------------------------
         // ✅ SUCCESS RESPONSE
-        return res.set('Content-Type', 'text/html').send(renderHTML);
+        return res.send(renderHTML);
         //----------------------------------------------------------------
-
-
     } catch (error) {
-        renderHTML = formatErrorInHtml('INTERNAL SERVER ERROR: There is a technical error, Contact Admin',
-        siteData?.clientFrontEndURL || '',
-        failurePage
-        );
-        return res.set('Content-Type', 'text/html').send(renderHTML);
+        renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is technical error, Contact Admin", siteData?.clientFrontEndURL, errorPage);
+        return res.send(renderHTML)
+
     }
 });
 //----------------------------------------------------------------------------------------------------------------------------------------------
