@@ -9,7 +9,7 @@ const cors = require('cors');
 const server = express();
 
 // Debug mode
-const debug = true;
+const debug = false;
 
 server.use((req, res, next) => {
     if (debug) console.log(`🌐 Incoming request: ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
@@ -87,9 +87,9 @@ server.use('/api/credentials', ensureConnection, CredentialsRouter);
 
 // RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
 
-const port = process.env.PORT || 5900
+const port = process.env.SERVER_PO  RT || 5900
 server.listen(port, () => {
-    console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
+    console.log(`Server running on port: ${process.env.SERVER_PORT} at ${new Date().toISOString()}`);
 });
 
 

@@ -89,7 +89,7 @@ server.use('/api/credentials', ensureConnection, CredentialsRouter);
 
 const port = process.env.PORT || 5900
 server.listen(port, () => {
-    console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
+    console.log(`Server running on port: ${} at ${new Date().toISOString()}`);
 });
 
 
