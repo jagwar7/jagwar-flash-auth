@@ -63,7 +63,7 @@ router.get('/google/url', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            "https://jagwar-flash-auth.onrender.com/api/flashauth/google/callback"
+            "https://fl"
         );
         const authURL = oAuthClientInstance.generateAuthUrl({
             access_type: "offline",
