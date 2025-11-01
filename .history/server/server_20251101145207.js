@@ -88,7 +88,7 @@ server.use('/api/credentials', ensureConnection, CredentialsRouter);
 // RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
 
 const port = process.env.SERVER_PORT || 5900
-server.listen(port, () => {
+server.listen(process.env.SERVER_PORT, () => {
     console.log(`Server running on port: ${process.env.SERVER_PORT} at ${new Date().toISOString()}`);
 });
 
