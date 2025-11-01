@@ -67,7 +67,7 @@ router.get('/google/url', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            `${process.env.RENDER_URL}/api/flashauth/google/callback`
+            `${process.env.}/api/flashauth/google/callback`
         );
         const authURL = oAuthClientInstance.generateAuthUrl({
             access_type: "offline",

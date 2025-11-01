@@ -8,8 +8,7 @@ const { UserCredentials } = require('../models/UserCredentials.model.js');
 const fs = require('fs').promises;
 const path = require('path');
 const { Decrypt } = require('../utils/encryptions.js');
-const dotenv = require('dotenv');
-dotenv.config();
+
 
 
 
@@ -67,7 +66,7 @@ router.get('/google/url', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            `${process.env.RENDER_URL}/api/flashauth/google/callback`
+            "https://jagwar-flash-auth.onrender.com/api/flashauth/google/callback"
         );
         const authURL = oAuthClientInstance.generateAuthUrl({
             access_type: "offline",
