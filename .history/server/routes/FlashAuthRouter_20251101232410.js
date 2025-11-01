@@ -13,7 +13,7 @@ const successPagePath = path.join(__dirname, '../views/success.html');
 const failurePagePath = path.join(__dirname, '../views/faliure.html');
 
 
-
+console.log(process.env)
 
 
 let successPage;

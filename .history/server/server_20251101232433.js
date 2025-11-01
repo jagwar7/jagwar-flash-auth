@@ -10,6 +10,7 @@ const server = express();
 
 // Debug mode
 const debug = true;
+console.log(process.env.re)
 server.use((req, res, next) => {
     if (debug) console.log(`🌐 Incoming request: ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
     next();

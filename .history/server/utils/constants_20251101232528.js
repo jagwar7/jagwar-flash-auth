@@ -1,6 +1,8 @@
-require('dotenv').config();
+require('dotenv');
+dotenv.config();
 
-const serverURL = process.env.REACT_APP_RENDER_URL;
+const serverURL = process.env.RENDER_URL;
+console.log(serverURL);
 
 const RedirectURL = `${serverURL}/api/flashauth/google/callback`;
 
