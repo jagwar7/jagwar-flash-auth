@@ -138,7 +138,7 @@ router.get('/google/callback', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            "https://jagwar-flash-auth.onrender.com/api/flashauth/google/callback"
+            
         );
 
         const tokenResponse = await oAuthClientInstance.getToken(code);     // EXCHANGE  <===> AUTH TOKEN BY PROVIDING AUTH CODE
