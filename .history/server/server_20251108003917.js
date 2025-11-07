@@ -9,8 +9,7 @@ const cors = require('cors');
 const server = express();
 
 // Debug mode
-const debug = false;
-
+const debug = true;
 server.use((req, res, next) => {
     if (debug) console.log(`🌐 Incoming request: ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
     next();
@@ -22,7 +21,7 @@ server.use((req, res, next) => {
 
 // REQUIRED COMPONENTS----------------------------------------------------------------------------------------------------
 server.use(cors({
-  origin: 'http://localhost:9002',
+  origin: 'http://localhost:3000',
   credentials: true
 }));
 server.use(express.json());
@@ -87,8 +86,7 @@ server.use('/api/credentials', ensureConnection, CredentialsRouter);
 
 // RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
 
-
-const port =  5900
+const port = process.env.PORT || 5900
 server.listen(port, () => {
     console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
 });
