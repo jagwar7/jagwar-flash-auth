@@ -22,7 +22,7 @@ server.use((req, res, next) => {
 
 // REQUIRED COMPONENTS----------------------------------------------------------------------------------------------------
 server.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'http://localhost:9002',
   credentials: true
 }));
 server.use(express.json());
@@ -86,8 +86,15 @@ server.use('/api/credentials', ensureConnection, CredentialsRouter);
 
 
 // RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
+<<<<<<< Updated upstream
 server.listen(process.env.SERVER_PORT, () => {
     console.log(`Server running on port: ${process.env.SERVER_PORT} at ${new Date().toISOString()}`);
+=======
+
+const port =  5900
+server.listen(port, () => {
+    console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
+>>>>>>> Stashed changes
 });
 
 
