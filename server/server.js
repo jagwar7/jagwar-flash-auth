@@ -21,11 +21,14 @@ server.use((req, res, next) => {
 
 
 // REQUIRED COMPONENTS----------------------------------------------------------------------------------------------------
+server.use(express.json());
+
+
 server.use(cors({
   origin: 'http://localhost:9002',
   credentials: true
 }));
-server.use(express.json());
+
 
 
 
@@ -57,18 +60,17 @@ FlashAuthDB.asPromise().catch((err) => console.error("❌ FlashAuthDB init error
 
 // DATABASE CONNENTION HANDLER---------------------------------------------------------------------------------------------------------------------------------------
 const ensureConnection = async (req, res, next) => {
-    if (debug) console.log(`🔍 Checking FlashAuthDB readiness, READY_STATE: ${FlashAuthDB.readyState}, \nTIME_STAMPS: ${new Date().toISOString()}, \nrequest: ${req.originalUrl}`);
+  try {
     if (FlashAuthDB.readyState !== 1) {
-        console.error(`🚫 DB not ready, READY_STATE: ${FlashAuthDB.readyState} \nTIME_STAMPS: ${new Date().toISOString()}`);
-        return res.status(503).json({ err: "Database is not ready, please try again later" });
+      return res.status(503).json({ err: "Database is not ready" });
     }
-    if (debug) console.log(`✅ DB ready, passing to router at ${new Date().toISOString()}`);
     req.db = FlashAuthDB;
     next();
+  } catch (err) {
+    next(err); // Let Express error handler catch it
+  }
 };
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
 
 
 
@@ -77,7 +79,7 @@ const ensureConnection = async (req, res, next) => {
 // ROUTES-----------------------------------------------------------------------------------------------------------------
 server.use('/api/auth', ensureConnection, AuthRouter);
 server.use('/api/flashauth', ensureConnection, FlashAuthRouter);
-server.use('/api/credentials', ensureConnection, CredentialsRouter);
+server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 //------------------------------------------------------------------------------------------------------------------------
 
 

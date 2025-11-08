@@ -101,7 +101,7 @@ const SignInWithJWT = async (req, res) => {
 
 
 // ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
-const SignUpWithGoogle = async (req, res) => {
+const SignInWithGoogle = async (req, res) => {
     const googleToken = req.header('Authorization')?.replace('Bearer google:', '');
 
     if (!googleToken) {
@@ -114,8 +114,15 @@ const SignUpWithGoogle = async (req, res) => {
         let user = await User.findOne({ email: decodedToken.email }).lean().exec();
 
         if (user) {
-            const jwtToken = generateJWT(user);
-            return res.status(200).json({ token: jwtToken, msg: "User already exists. Please sign in." });
+            const userObj = {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                authType : 'google'
+                
+            }
+            const jwtToken = generateJWT(userObj);
+            return res.status(200).json({success: true, data:jwtToken, message: "Successfully signed in" });
         }
         
         user = new User({
@@ -126,36 +133,19 @@ const SignUpWithGoogle = async (req, res) => {
         });
         await user.save();
 
-        const jwtToken = generateJWT(user);
-        return res.status(200).json({ token: jwtToken, msg: "Successfully signed up with google." });
-    } catch (error) {
-        return res.status(500).json({ msg: "INTERNAL SERVER ERROR" });
-    }
-};
-
-const SignInWithGoogle = async (req, res) => {
-    const googleToken = req.header('Authorization')?.replace('Bearer google:', '');
-
-    if (!googleToken) {
-        return res.status(500).json({ msg: "Invalid auth token" });
-    }
-
-    try {
-        const User = req.db.model('User', userSchema);
-        const decodedToken = await firebaseAdmin.auth().verifyIdToken(googleToken);
-        const user = await User.findOne({ email: decodedToken.email }).lean().exec();
-
-        if (!user) {
-            return res.status(404).json({ msg: "User doesn't exist. Please sign up" });
+        const userObj = {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            authType: 'google'
         }
-        const jwtToken = generateJWT(user);
-        const userData = { name: decodedToken.name, email: decodedToken.email };
-
-        return res.status(200).json({ token: jwtToken, data: userData, msg: "Signed in successfully" });
+        const jwtToken = generateJWT(userObj);
+        return res.status(200).json({success: true, data:jwtToken, message: "Successfully signed up." });
     } catch (error) {
-        return res.status(500).json({ msg: "INTERNAL SERVER ERROR" });
+        return res.status(500).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin" });
     }
 };
+
 // ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
 
 
@@ -175,18 +165,19 @@ exports.signup = [
         next();
     },
     async (req, res) => {
+        console.log(req.body);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-        const { authType = 'local' } = req.body;
+        const { authType} = req.body;
         switch (authType) {
             case 'local':
                 return SignUpWithJWT(req, res);
             case 'google':
-                return SignUpWithGoogle(req, res);
+                return SignInWithGoogle(req, res);
             default:
-                return res.status(400).json({ msg: "INTERNAL SERVER ERROR: Invalid auth provider" });
+                return res.status(400).json({success:false, message: "INTERNAL SERVER ERROR: Invalid auth provider" });
         }
     }
 ];
@@ -213,14 +204,14 @@ exports.signin = [
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
-        const{authType = 'local'} = req.body;
+        const{authType} = req.body;
         switch(authType){
             case "local":
                 return SignInWithJWT(req, res);
             case "google":
                 return SignInWithGoogle(req, res);
             default:
-                return res.status(500).json({msg: "INTERNAL SERVER ERROR: Invalid auth provider"});
+                return res.status(500).json({success: false, message: "INTERNAL SERVER ERROR: Invalid auth provider"});
         }
     }
 ];

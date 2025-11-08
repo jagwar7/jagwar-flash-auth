@@ -6,20 +6,22 @@ const firebaseAdmin = require('../config/firebaseAdmin');
 
 
 const AuthProviderSwitcher = (req, res, next)=>{
-    let token = req.header('Authorization')?.replace('Bearer ', '');
+    let token = req.header('Authorization');
     if(!token){
-        return res.status(401).json({msg: "Logged Out, Please sign in"});
+        return res.status(401).json({success: false, message: "No token passed on"});
     }
-    if(token.startsWith('local:')){
+    if(token.startsWith('Bearer ')){
+        token = token.replace('Bearer ', '');
         token = token.replace('local:', '');
         return VerifyJWTToken(req, res, token, next);
     }
-    if(token.startsWith('google:')){
+    if(token.startsWith('Bearer ')){
+        token = token.replace('Bearer ', '');
         token = token.replace('google:', '');
         return VerifyGoogleToken(req, res, token, next);
     }
 
-    return res.status(401).json({msg: "Unsupported login provider"});
+    return res.status(401).json({success: false, message: "Unsupported login provider"});
 }
 
 
@@ -54,6 +56,9 @@ const VerifyGoogleToken = async (req, res, token ,next)=>{
 const VerifyJWTToken = (req, res, token, next)=>{
     try{
         const decodeToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        if(!decodeToken){
+            return res.status(401).json({success: false, message: "Missing token"});
+        }
         req.user = {
             id: decodeToken.id,
             email: decodeToken.email,
@@ -62,7 +67,8 @@ const VerifyJWTToken = (req, res, token, next)=>{
         };
         next();
     }catch(err){
-        res.status(401).json({msg: "TOKEN IS NOT VALID"});
+        
+        res.status(401).json({success: false, message: "Invalid token"});
     }
 }
 

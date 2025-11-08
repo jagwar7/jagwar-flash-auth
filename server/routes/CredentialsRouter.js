@@ -21,7 +21,6 @@ router.get('/get', AuthProviderSwitcher, async(req, res)=>{
         creds.clientMongoDbUri = Decrypt(creds.clientMongoDbUri);
         return res.status(200).json({success: true, message:"Fetched latest credentials", data: creds});
     } catch (error) {
-        console.error("Error fetching credentials:", error);
         return res.status(500).json({success: false, message: "Error fetching credentials"});
     }
 });
@@ -82,7 +81,7 @@ router.put('/update', AuthProviderSwitcher, async(req, res)=>{
         }else {
             // UPDATE EXISTING CREDENTIALS------ FRESH DATA---------||------ EXISTING DATA-----
             creds.clientFrontEndURL =    Encrypt(clientFrontEndURL) || creds.clientFrontEndURL;
-            creds.clientPublicKey =        Encrypt(clientPublicKey) || creds.clientPublicKey;
+            creds.clientPublicKey =              clientPublicKey    ||  creds.clientPublicKey;
             creds.clientSecretKey =        Encrypt(clientSecretKey) || creds.clientSecretKey;
             creds.clientMongoDbUri =      Encrypt(clientMongoDbUri) || creds.clientMongoDbUri;
             creds.googleClientId =          Encrypt(googleClientId) || creds.googleClientId;
@@ -91,9 +90,8 @@ router.put('/update', AuthProviderSwitcher, async(req, res)=>{
         }
 
         await creds.save();
-        return res.status(200).send({success: true, message: "Credentials saved successfully."});
+        return res.status(200).json({success: true, message: "Credentials saved successfully."});
     } catch (error) {
-        console.error("Error updating credentials:", error);
         return res.status(500).json({success: false, message: "There is an error while updating credentials, Contact Admin"});
     }
 });
