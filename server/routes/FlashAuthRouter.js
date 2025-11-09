@@ -44,9 +44,7 @@ const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
 // GET: SEND GOOGLE AUTH URL ---> FLASHAUTH-SDK
 router.get('/google/url', async(req, res)=>{
     const clientPublicKey = req.header('X-Client-Id');
-    console.log(clientPublicKey);
     try {
-        const clientPublicKey = req.header('X-Client-Id');
         if(!clientPublicKey){
             return res.status(400).json({success: false, message: "CLIENT ERROR: Missing client public key, Contact Admin"});
         }
@@ -64,18 +62,22 @@ router.get('/google/url', async(req, res)=>{
         googleClientId = Decrypt(googleClientId);
         googleClientSecret = Decrypt(googleClientSecret);
 
+        googleClientId = googleClientId.trim().replace(/\/+$/, '');
+        googleClientSecret = googleClientSecret.trim();
+        
+
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
             "https://jagwar-flash-auth.onrender.com/api/flashauth/google/callback"
         );
+
         const authURL = oAuthClientInstance.generateAuthUrl({
             access_type: "offline",
             scope: ["profile", "email"],
             prompt: "select_account",
             state: clientPublicKey
         });
-
         if(!authURL){
             return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin"});
         }
@@ -107,6 +109,7 @@ let renderHTML;
 
 //  GOOGLE AUTH RESPONSE AFTER USER ATTTEMPTS TO LOGIN VIA GOOGLE-------------------------------------------------------------------------------------------
 router.get('/google/callback', async(req, res)=>{
+    let siteData;
     try {
         const {code, state} = req.query;                                     // NO AUTH CODE OR CLIENT PUBLIC KEY --> CANCEL
         if(!code || !state){
@@ -115,7 +118,7 @@ router.get('/google/callback', async(req, res)=>{
         }
         
         const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
-        const siteData = await userCredentialCollection.findOne({clientPublicKey: state});     // GET SITE OWNER's INFORMATION
+        siteData = await userCredentialCollection.findOne({clientPublicKey: state});     // GET SITE OWNER's INFORMATION
 
         if(!siteData){  // IF NO USER CREDENTIALS---> RETURN ERROR
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: Site data not found, Contact Admin", clientFrontEndURL, failurePage);
@@ -123,17 +126,15 @@ router.get('/google/callback', async(req, res)=>{
         }
             
 
-
         // -----------------------------------------------------------------------------------------
         //EXTRACT USER CREDENTIALS
         let {googleClientId, googleClientSecret, clientMongoDbUri, clientFrontEndURL} = siteData;
 
-        googleClientId = Decrypt(googleClientId);
-        googleClientSecret = Decrypt(googleClientSecret);
+        googleClientId = Decrypt(googleClientId).trim().replace(/\/+$/, '');
+        googleClientSecret = Decrypt(googleClientSecret).trim();
         clientMongoDbUri = Decrypt(clientMongoDbUri);
         clientFrontEndURL = Decrypt(clientFrontEndURL);
         // -----------------------------------------------------------------------------------------
-
 
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
@@ -174,7 +175,7 @@ router.get('/google/callback', async(req, res)=>{
         // ------------------------------------------------------------------------------------------------------
         // TRY CRAETE / UPDATE USER IN CLIENT's MONGODB
         const createOrUpdateInDb = await findOrCreate(clientMongoDbUri,userProfile);
-        if(createOrUpdateInDb == false){
+        if(createOrUpdateInDb.success == false){
             renderHTML = formatErrorInHtml(createOrUpdateInDb.message, clientFrontEndURL, failurePage);
             return res.set('Content-Type', 'text/html').send(renderHTML);
         }
