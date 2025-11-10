@@ -1,5 +1,6 @@
 require('dotenv').config();
 const admin = require('firebase-admin');
+// const serviceAccount = require('./serviceAccountKey.json');
 
 admin.initializeApp({
   credential: admin.credential.cert({
@@ -13,7 +14,7 @@ admin.initializeApp({
     token_uri: "https://oauth2.googleapis.com/token",
     auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
     client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
-    universe_domain: 'googleapis.com'
+    universe_domain: process.env.UNIVERSE_DOMAIN
   }),
 });
 

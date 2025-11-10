@@ -94,6 +94,7 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 const port = process.env.PORT || 5900
+>>>>>>> stable
 server.listen(port, () => {
     console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
 });

@@ -9,7 +9,8 @@ const cors = require('cors');
 const server = express();
 
 // Debug mode
-const debug = true;
+const debug = false;
+
 server.use((req, res, next) => {
     if (debug) console.log(`🌐 Incoming request: ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
     next();
@@ -90,7 +91,6 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 // RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
-
 
 
 const port = process.env.PORT || 5900
