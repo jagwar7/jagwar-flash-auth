@@ -93,7 +93,7 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 // RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
 
 
-const port = process.env.PORT || 5900
+const port = process.env. 5900
 server.listen(port, () => {
     console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
 });
