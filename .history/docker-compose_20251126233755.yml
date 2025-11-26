@@ -1,0 +1,4 @@
+version: '3.8'
+mongodb:
+  image: mongo:latest
+  container_name: mongodb

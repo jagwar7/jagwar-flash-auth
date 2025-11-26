@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./server
+    container_name: express-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb+srv://jagwarauth:FuckYouSabnur@jagwarcluster.jsrzyzq.mongodb.net/?retryWrites=true&w=majority&appName=jagwarcluster
+    volumes:
+      - ./server:/app
+      - /app/node_modules

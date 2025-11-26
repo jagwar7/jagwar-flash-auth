@@ -4,7 +4,7 @@ const Encrypt = (data)=>{
   return Buffer.from(data).toString('base64');
 }
 
-const Decrypt = (data)=>{
+export const Decrypt = (data)=>{
   return Buffer.from(data, 'base64').toString('utf8');
 }
 
