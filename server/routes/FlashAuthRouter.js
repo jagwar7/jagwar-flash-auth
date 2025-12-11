@@ -8,6 +8,9 @@ const fs = require('fs').promises;
 const path = require('path');
 const { Decrypt } = require('../utils/encryptions.js');
 const dotenv = require('dotenv');
+const {getSiteData} = require('../utils/redisCache.js');
+const {localServer, renderServer} = require('../utils/constants.js')
+
 dotenv.config();
 
 
@@ -49,8 +52,9 @@ router.get('/google/url', async(req, res)=>{
         }
 
         // FIND USER CREDENTIALS 
-        const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
-        const siteData = await userCredentialCollection.findOne({clientPublicKey: clientPublicKey});
+        // const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
+        // const siteData = await userCredentialCollection.findOne({clientPublicKey: clientPublicKey});
+        const siteData = await getSiteData(clientPublicKey, req.db);
 
         if(!siteData){
             return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Site data not found, Contact Admin"});
@@ -68,7 +72,7 @@ router.get('/google/url', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            "https://jagwar-flash-auth.onrender.com/api/flashauth/google/callback"
+            `${localServer}/api/flashauth/google/callback`
         );
 
         const authURL = oAuthClientInstance.generateAuthUrl({
@@ -116,8 +120,10 @@ router.get('/google/callback', async(req, res)=>{
             return res.set('Content-Type', 'text/html').send(renderHTML);
         }
         
-        const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
-        siteData = await userCredentialCollection.findOne({clientPublicKey: state});     // GET SITE OWNER's INFORMATION
+        // const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
+        // siteData = await userCredentialCollection.findOne({clientPublicKey: state});     // GET SITE OWNER's INFORMATION
+        const clientPublicKey = state;
+        siteData = await getSiteData(clientPublicKey, req.db);
 
         if(!siteData){  // IF NO USER CREDENTIALS---> RETURN ERROR
             renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: Site data not found, Contact Admin", clientFrontEndURL, failurePage);
@@ -138,7 +144,7 @@ router.get('/google/callback', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            "https://jagwar-flash-auth.onrender.com/api/flashauth/google/callback"
+            `${localServer}/api/flashauth/google/callback`
         );
 
         const tokenResponse = await oAuthClientInstance.getToken(code);     // EXCHANGE  <===> AUTH TOKEN BY PROVIDING AUTH CODE

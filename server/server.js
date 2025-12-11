@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const AuthRouter = require('./routes/AuthRouter');
 const FlashAuthRouter = require('./routes/FlashAuthRouter');
 const CredentialsRouter = require('./routes/CredentialsRouter');
-
+const redisClient = require('./redis/client')
 require('dotenv').config();
 const cors = require('cors'); 
 const server = express();
@@ -78,6 +78,37 @@ const ensureConnection = async (req, res, next) => {
 
 
 
+
+// REDIS CONNECTION--------------------------------------------------------------------------------------------------------------------------------------------------
+async function initializeRedis() {
+    try {
+        // Wait a bit for Redis to connect
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        if (!redisClient.isOpen || !redisClient.isReady) {
+            console.log('⚠️ Redis not connected, attempting to reconnect...');
+            await redisClient.connect();
+        }
+        console.log('✅ Redis is ready');
+    } catch (error) {
+        console.log('⚠️ Continuing without Redis cache:', error.message);
+    }
+}
+
+
+initializeRedis().then(() => {
+    const port = 5900;
+    server.listen(port, () => {
+        console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
+    });
+});
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
 // ROUTES-----------------------------------------------------------------------------------------------------------------
 server.use('/api/auth', ensureConnection, AuthRouter);
 server.use('/api/flashauth', ensureConnection, FlashAuthRouter);
@@ -93,7 +124,7 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 
-const port = process.env.PORT || 5900
+const port = 5900
 server.listen(port, () => {
     console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
 });

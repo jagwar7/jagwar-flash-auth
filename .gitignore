@@ -4,6 +4,9 @@ node_modules/
 # dotenv
 .env
 
+# local history
+.history
+
 # logs
 logs
 *.log
@@ -14,3 +17,12 @@ build/
 
 # misc
 .DS_Store
+
+
+
+tory*
+*type*
+*wc*
+*~*
+*.swp
+*.swo

@@ -1,15 +1,27 @@
-version: '3.8'
-
 services:
   backend:
     build: 
       context: ./server
     container_name: express-backend
     ports:
-      - "5000:5900"  # Map localhost:5000 → container:5900
+      - "5900:5900"
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb+srv://jagwarauth:FuckYouSabnur@jagwarcluster.jsrzyzq.mongodb.net/test?retryWrites=true&w=majority&appName=jagwarcluster
+      - REDIS_URL=redis://redis:6379  
+    depends_on:
+      - redis
     volumes:
       - ./server:/app
       - /app/node_modules
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
