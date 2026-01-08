@@ -2,11 +2,11 @@ require('dotenv').config();
 const admin = require('firebase-admin');
 const path = require('path');
 
-// Point directly to the file created by the Jenkins pipeline
-const serviceAccountPath = path.join(__context, 'firebase_config.json');
+// __dirname ensures it looks in the same folder as this script
+const serviceAccountPath = path.join(__dirname, 'firebase_config.json');
 
 admin.initializeApp({
-  // Instead of mapping 10 variables, we just load the whole file
+  // This reads the physical file created by your Jenkins pipeline
   credential: admin.credential.cert(require(serviceAccountPath)),
 });
 
