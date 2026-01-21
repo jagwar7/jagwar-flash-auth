@@ -1,8 +1,6 @@
 version: '3.8'
-
 services:
   backend:
-    # Use the image built and pushed by Jenkins
     image: jagwar7/flash-auth-app:latest
     container_name: express-backend
     restart: always
@@ -10,14 +8,11 @@ services:
       - "5900:5900"
     environment:
       - NODE_ENV=production
-      # This is injected from the jagwar_mongo_uri SecureString in the Jenkinsfile
       - MONGODB_URI=${MONGODB_URI}
       - REDIS_URL=redis://redis:6379
-      # Path inside the container where the Firebase JSON is mounted
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/server/firebase-auth.json
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
     volumes:
-      # Map the decrypted JSON file created on the EC2 host into the container
-      - /home/ubuntu/firebase-auth.json:/app/server/firebase-auth.json
+      - /home/ubuntu/firebase-auth.json:/app/config/firebase_config.json
     depends_on:
       - redis
 
