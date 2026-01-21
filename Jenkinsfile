@@ -53,7 +53,7 @@ chmod 600 /home/ubuntu/firebase-auth.json
 export MONGODB_URI='${mongoUri}'
 
 docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
-docker-compose down || true
+docker-compose down --remove-orphans || true
 docker-compose up -d
 EOF
                         """
