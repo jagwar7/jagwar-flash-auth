@@ -45,20 +45,17 @@ pipeline {
                         // Remote deployment via SSH
                         sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${FLASH_AUTH_PRIVATE_IP} << 'EOF'
-                            # Safely write the decrypted JSON to a file
-                            cat << 'JSON' > /home/ubuntu/firebase-auth.json
-                            ${firebaseJson}
-                            JSON
-                            
-                            # Set permissions so only the owner can read the sensitive file
-                            chmod 600 /home/ubuntu/firebase-auth.json
-                            
-                            export MONGODB_URI='${mongoUri}'
-                            
-                            docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
-                            docker-compose down || true
-                            docker-compose up -d
-                        EOF
+cat << 'JSON' > /home/ubuntu/firebase-auth.json
+${firebaseJson}
+JSON
+
+chmod 600 /home/ubuntu/firebase-auth.json
+export MONGODB_URI='${mongoUri}'
+
+docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
+docker-compose down || true
+docker-compose up -d
+EOF
                         """
                     }
                 }
