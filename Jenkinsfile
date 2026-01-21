@@ -29,7 +29,6 @@ pipeline {
             }
         }
 
-        // ... (rest of pipeline same)
         stage('4. Deploy to Backend EC2') {
             steps {
                 sshagent(['FLASH-AUTH-EC2']) {
@@ -41,17 +40,22 @@ pipeline {
 
                         sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${FLASH_AUTH_PRIVATE_IP} << 'EOF'
+# Create Firebase JSON
 cat << 'JSON' > /home/ubuntu/firebase-auth.json
 ${firebaseJson}
 JSON
 
-chmod 600 /home/ubuntu/firebase-auth.json
+# Create .env file - THIS IS THE SOURCE OF TRUTH FOR DOCKER
+# Using double quotes to ensure the string is treated as one block
+echo "MONGODB_CONNECTION_URL='${mongoUri}'" > /home/ubuntu/.env
+echo "NODE_ENV=production" >> /home/ubuntu/.env
+echo "REDIS_URL=redis://redis:6379" >> /home/ubuntu/.env
+
+chmod 600 /home/ubuntu/firebase-auth.json /home/ubuntu/.env
 
 docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
 docker-compose down --remove-orphans || true
-
-# Pass it using the name server.js expects
-MONGODB_CONNECTION_URL='${mongoUri}' docker-compose up -d
+docker-compose up -d
 EOF
                         """
                     }

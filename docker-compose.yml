@@ -7,14 +7,12 @@ services:
     restart: always
     ports:
       - "5900:5900"
+    # Load the physical file we created in the Jenkinsfile
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=production
-      # This maps the shell variable to the container environment variable
-      - MONGODB_URI=${MONGODB_URI}
-      - REDIS_URL=redis://redis:6379
       - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
     volumes:
-      # Map host decrypted file to the path the app expects
       - /home/ubuntu/firebase-auth.json:/app/config/firebase_config.json
     depends_on:
       - redis
@@ -25,8 +23,6 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
 
 volumes:
   redis_data:
