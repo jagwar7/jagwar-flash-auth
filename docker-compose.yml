@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   backend:
     image: jagwar7/flash-auth-app:latest
@@ -8,10 +9,12 @@ services:
       - "5900:5900"
     environment:
       - NODE_ENV=production
+      # This maps the shell variable to the container environment variable
       - MONGODB_URI=${MONGODB_URI}
       - REDIS_URL=redis://redis:6379
       - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
     volumes:
+      # Map host decrypted file to the path the app expects
       - /home/ubuntu/firebase-auth.json:/app/config/firebase_config.json
     depends_on:
       - redis

@@ -4,7 +4,6 @@ pipeline {
     environment {
         DOCKER_USER = 'jagwar7' 
         IMAGE_NAME  = 'flash-auth-app'
-        // Your Backend EC2 Private IP
         FLASH_AUTH_PRIVATE_IP = '172.31.47.118'
     }
 
@@ -34,31 +33,28 @@ pipeline {
             steps {
                 sshagent(['FLASH-AUTH-EC2']) {
                     script {
-                        // Fetching SecureStrings from AWS SSM
+                        // 1. Fetch SecureStrings from AWS SSM
                         def mongoUri = sh(script: "aws ssm get-parameter --name 'jagwar_mongo_uri' --with-decryption --query 'Parameter.Value' --output text", returnStdout: true).trim()
                         def firebaseJson = sh(script: "aws ssm get-parameter --name 'jagwar-firebase-josn' --with-decryption --query 'Parameter.Value' --output text", returnStdout: true).trim()
 
-                        // Transfer the docker-compose.yml to the target server
+                        // 2. Transfer the compose file
                         sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${FLASH_AUTH_PRIVATE_IP}:/home/ubuntu/"
 
-                        // Remote deployment via SSH
+                        // 3. Remote execution
                         sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${FLASH_AUTH_PRIVATE_IP} << 'EOF'
-# Safely write the decrypted JSON to a file
-# Note: JSON marker must be flush left!
+# Create Firebase JSON (Ensure JSON delimiter is flush left)
 cat << 'JSON' > /home/ubuntu/firebase-auth.json
 ${firebaseJson}
 JSON
 
 chmod 600 /home/ubuntu/firebase-auth.json
 
-# Pull the latest image
+# Pull and Reset
 docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
-
-# Stop existing containers
 docker-compose down --remove-orphans || true
 
-# START COMMAND: Explicitly inject the MONGODB_URI into the compose process
+# Inject the variable directly into the docker-compose command
 MONGODB_URI='${mongoUri}' docker-compose up -d
 EOF
                         """
