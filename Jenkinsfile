@@ -29,33 +29,29 @@ pipeline {
             }
         }
 
+        // ... (rest of pipeline same)
         stage('4. Deploy to Backend EC2') {
             steps {
                 sshagent(['FLASH-AUTH-EC2']) {
                     script {
-                        // 1. Fetch SecureStrings from AWS SSM
                         def mongoUri = sh(script: "aws ssm get-parameter --name 'jagwar_mongo_uri' --with-decryption --query 'Parameter.Value' --output text", returnStdout: true).trim()
                         def firebaseJson = sh(script: "aws ssm get-parameter --name 'jagwar-firebase-josn' --with-decryption --query 'Parameter.Value' --output text", returnStdout: true).trim()
 
-                        // 2. Transfer the compose file
                         sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${FLASH_AUTH_PRIVATE_IP}:/home/ubuntu/"
 
-                        // 3. Remote execution
                         sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${FLASH_AUTH_PRIVATE_IP} << 'EOF'
-# Create Firebase JSON (Ensure JSON delimiter is flush left)
 cat << 'JSON' > /home/ubuntu/firebase-auth.json
 ${firebaseJson}
 JSON
 
 chmod 600 /home/ubuntu/firebase-auth.json
 
-# Pull and Reset
 docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
 docker-compose down --remove-orphans || true
 
-# Inject the variable directly into the docker-compose command
-MONGODB_URI='${mongoUri}' docker-compose up -d
+# Pass it using the name server.js expects
+MONGODB_CONNECTION_URL='${mongoUri}' docker-compose up -d
 EOF
                         """
                     }
