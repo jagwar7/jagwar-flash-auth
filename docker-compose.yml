@@ -6,7 +6,7 @@ services:
     container_name: express-backend
     restart: always
     ports:
-      - "5900:5900"
+      - "5000:5900"
     # Load the physical file we created in the Jenkinsfile
     env_file:
       - .env
