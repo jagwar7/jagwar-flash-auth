@@ -98,7 +98,7 @@ async function initializeRedis() {
 
 initializeRedis().then(() => {
     const port = process.env.PORT || 5900;
-    const runnigServer = server.listen(port, () => {
+    const runningServer = server.listen(port, () => {
         console.log(`🌐 ✅ 🚀 Server running on port: ${port} at ${new Date().toISOString()}`);
     });
     
