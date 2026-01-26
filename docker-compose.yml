@@ -14,9 +14,12 @@ services:
     volumes:
       - /home/ubuntu/firebase-auth.json:/app/config/firebase_config.json
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy # WAIT UNTIL REDIS STARTS 
     networks:
       - app-network
+
+
 
   redis:
     image: redis:7-alpine
@@ -29,6 +32,13 @@ services:
       resources:
         limits:
           memory: 256M #MEMEROY ALLOCATED FOR REDIS CACHING
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  
     networks:
       - app-network
     
