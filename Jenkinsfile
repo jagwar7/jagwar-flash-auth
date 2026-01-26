@@ -5,6 +5,7 @@ pipeline {
         DOCKER_USER = 'jagwar7' 
         IMAGE_NAME  = 'flash-auth-app'
         FLASH_AUTH_PRIVATE_IP = '172.31.47.118'
+
     }
 
     stages {
