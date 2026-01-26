@@ -69,7 +69,7 @@ const ensureConnection = async (req, res, next) => {
     req.db = FlashAuthDB;
     next();
   } catch (err) {
-    next(err); // Let Express error handler catch it
+    next(err);
   }
 };
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -97,9 +97,11 @@ async function initializeRedis() {
 
 
 initializeRedis().then(() => {
-    const port = 5900;
+    const port = process.env.PORT || 5900;
     server.listen(port, () => {
         console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
+    }).catch((err)=>{
+        console.log(`Failed to start server: `, err);
     });
 });
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -119,15 +121,6 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 
-
-// RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
-
-
-
-const port = 5900
-server.listen(port, () => {
-    console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
-});
 
 
 process.on('unhandledRejection', (err) => {
