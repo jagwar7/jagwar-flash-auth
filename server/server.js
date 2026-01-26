@@ -98,10 +98,12 @@ async function initializeRedis() {
 
 initializeRedis().then(() => {
     const port = process.env.PORT || 5900;
-    server.listen(port, () => {
-        console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
-    }).catch((err)=>{
-        console.log(`Failed to start server: `, err);
+    const runnigServer = server.listen(port, () => {
+        console.log(`🌐 ✅ 🚀 Server running on port: ${port} at ${new Date().toISOString()}`);
+    });
+    
+    runningServer.on('error', (err)=>{
+       console.log(`❌ ⚠️ Failed to start server`);
     });
 });
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
