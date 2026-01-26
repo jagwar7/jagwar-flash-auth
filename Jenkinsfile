@@ -55,8 +55,8 @@ echo "REDIS_URL=redis://redis:6379" >> /home/ubuntu/.env
 chmod 600 /home/ubuntu/firebase-auth.json /home/ubuntu/.env
 
 docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
-docker-compose down --remove-orphans || true
-docker-compose up -d
+docker compose down --remove-orphans || true
+docker compose up -d
 EOF
                         """
                     }
