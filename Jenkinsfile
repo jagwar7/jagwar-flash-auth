@@ -5,6 +5,7 @@ pipeline {
         DOCKER_USER = 'jagwar7' 
         IMAGE_NAME  = 'flash-auth-app'
         FLASH_AUTH_PRIVATE_IP = '172.31.47.118'
+
     }
 
     stages {
@@ -40,22 +41,27 @@ pipeline {
 
                         sh """
                         ssh -o StrictHostKeyChecking=no ubuntu@${FLASH_AUTH_PRIVATE_IP} << 'EOF'
-# Create Firebase JSON
+
+# CREATE FIREBAS CONFIG FOR AUTH
 cat << 'JSON' > /home/ubuntu/firebase-auth.json
 ${firebaseJson}
 JSON
 
-# Create .env file - THIS IS THE SOURCE OF TRUTH FOR DOCKER
-# Using double quotes to ensure the string is treated as one block
-echo "MONGODB_CONNECTION_URL='${mongoUri}'" > /home/ubuntu/.env
-echo "NODE_ENV=production" >> /home/ubuntu/.env
-echo "REDIS_URL=redis://redis:6379" >> /home/ubuntu/.env
+# CREATE .ENV FILE FOR DOCKER REQUIREMENT 
+cat << 'ENV_FILE' > /home/ubuntu/.env
+FIREBASE_CONFIG_PATH=./firebase-auth.json
+PORT=5800
+MONGODB_CONNECTION_URL='${mongoUri}'
+REDIS_URL=redis://redis:6379
+NODE_ENV=production
+ENV_FILE
+
 
 chmod 600 /home/ubuntu/firebase-auth.json /home/ubuntu/.env
 
 docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
-docker-compose down --remove-orphans || true
-docker-compose up -d
+docker compose down --remove-orphans || true
+docker compose up -d
 EOF
                         """
                     }
