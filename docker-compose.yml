@@ -11,7 +11,7 @@ services:
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
     volumes:
-      - /home/ubuntu/firebase-auth.json:/app/config/firebase_config.json
+      - ${FIREBASE_CONFIG_PATH}:/app/config/firebase_config.json
     depends_on:
       redis:
         condition: service_healthy # WAIT UNTIL REDIS STARTS 
