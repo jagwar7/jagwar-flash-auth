@@ -26,3 +26,6 @@ tory*
 *~*
 *.swp
 *.swo
+
+.firebase_config.json
+./config/firebase_config.json

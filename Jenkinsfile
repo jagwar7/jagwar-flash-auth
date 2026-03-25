@@ -1,64 +1,54 @@
-pipeline {
+pipeline{
     agent any
-
-    environment {
-        DOCKER_USER = 'jagwar7' 
-        IMAGE_NAME  = 'flash-auth-app'
-        FLASH_AUTH_PRIVATE_IP = '172.31.47.118'
-
+    
+    environment{
+        AWS_REGION              = 'ap-southeast-2'
+        AWS_ACCOUNT_ID          = '696737009734'
+        ECR_REPO_NAME           = 'ecr-flashauth-backend'
+        ECR_REPO_URL            = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}"
+        FLASHAUTH_INSTANCE_ID   = 'i-0289f0572d72abc0e'
+        FLASHAUTH_S3_BUCKET     = 'flashauth-backend-s3-696737009734-ap-southeast-2-an'
     }
 
     stages {
-        stage('1. Fetch Code') {
-            steps {
+        stage('#1. Checkout Flash Auth backend repo'){
+            steps{
                 checkout scm
             }
         }
 
-        stage('2. Build Docker Image') {
-            steps {
-                sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME}:latest ./server"
+        stage('#2. Build docker image'){
+            steps{
+                echo "🛠️ Building docker image of Flash⚡Auth backend"
+                sh "docker build -t ${ECR_REPO_NAME}:latest"
             }
         }
 
-        stage('3. Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'DOCKER-HUB-CREDS', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
-                    sh "echo ${PASS} | docker login -u ${USER} --password-stdin"
-                    sh "docker push ${DOCKER_USER}/${IMAGE_NAME}:latest"
+        stage('#3. Push built image to ECR'){
+            steps{
+                script{
+                    echo "👨‍💻 Logging into AWS ECR..."
+                    sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+
+                    echo "➡️ Assiging tag to built image..."
+                    sh "docker tag ${ECR_REPO_NAME}:latest ${ECR_REPO_URL}:latest"
+
+                    echo "⏫ Pushing image to AWS ECR"
+                    sh "docker push ${ECR_REPO_URL}:latest"
+
+                    echo "⏫ Uploading compose file to S3..."
+                    sh "aws s3 cp docker-compose.yml s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml" 
                 }
             }
         }
 
-        stage('4. Deploy to Backend EC2') {
-            steps {
-                sshagent(['FLASH-AUTH-EC2']) {
-                    script {
-                        def mongoUri = sh(script: "aws ssm get-parameter --name 'jagwar_mongo_uri' --with-decryption --query 'Parameter.Value' --output text", returnStdout: true).trim()
-                        def firebaseJson = sh(script: "aws ssm get-parameter --name 'jagwar-firebase-josn' --with-decryption --query 'Parameter.Value' --output text", returnStdout: true).trim()
-
-                        sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@${FLASH_AUTH_PRIVATE_IP}:/home/ubuntu/"
-
-                        sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@${FLASH_AUTH_PRIVATE_IP} << 'EOF'
-# Create Firebase JSON
-cat << 'JSON' > /home/ubuntu/firebase-auth.json
-${firebaseJson}
-JSON
-
-# Create .env file - THIS IS THE SOURCE OF TRUTH FOR DOCKER
-# Using double quotes to ensure the string is treated as one block
-echo "MONGODB_CONNECTION_URL='${mongoUri}'" > /home/ubuntu/.env
-echo "NODE_ENV=production" >> /home/ubuntu/.env
-echo "REDIS_URL=redis://redis:6379" >> /home/ubuntu/.env
-
-chmod 600 /home/ubuntu/firebase-auth.json /home/ubuntu/.env
-
-docker pull ${DOCKER_USER}/${IMAGE_NAME}:latest
-docker compose down --remove-orphans || true
-docker compose up -d
-EOF
-                        """
+        stage('#4. Deploy to EC2 via SSM'){
+            steps{
+                script{
+                    echo "Fetching credentials from AWS parameter store..."
+                    def getParam = {name ->
+                        sh(script: "aws ssm get-parameter --name '$name' --with-decryption --query 'Parameter.Value' --output text --region ${AWS_REGION}", returnStdout: true).trim()
+                        
                     }
                 }
             }

@@ -145,7 +145,6 @@ const SignInWithGoogle = async (req, res) => {
         return res.status(500).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin" });
     }
 };
-
 // ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
 
 

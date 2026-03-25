@@ -1,29 +1,7 @@
-version: '3.8'
-
 services:
-  backend:
-    image: jagwar7/flash-auth-app:latest
-    container_name: express-backend
-    restart: always
-    ports:
-      - "5000:${PORT:-5900}"
-    env_file:
-      - .env
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
-    volumes:
-      - /home/ubuntu/firebase-auth.json:/app/config/firebase_config.json
-    depends_on:
-      redis:
-        condition: service_healthy # WAIT UNTIL REDIS STARTS 
-    networks:
-      - app-network
-
-
-
   redis:
     image: redis:7-alpine
-    container_name: redis-cache
+    container_name: redis-container
     restart: always
     command: ["redis-server", "--appendonly", "yes"]
     volumes:
@@ -31,21 +9,43 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M #MEMEROY ALLOCATED FOR REDIS CACHING
-
+          memory: 256M
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
+      interval: 10s
+      timeout: 5s
       retries: 5
-  
     networks:
-      - app-network
-    
+      - flashauth-network
+
+  backend:
+    build: .
+    image: flash-auth-backend
+    container_name: flashauth-container
+    restart: always
+    ports:
+      - "${ENV_SYSTEM_PORT}:${ENV_CONTAINER_PORT}" # INCOMING TRAFFIC ON : SYSTEM_PORT ----FORWARDED---> CONTAINER_PORT 
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - CONTAINER_PORT=${ENV_CONTAINER_PORT}  #  DOCKER CONTAINER PORT <----- ENV_CONTAINER_PORT
+      - REDIS_URL=redis://redis-container:6379
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
+      - RABBIT_HOST=${ENV_RABBIT_HOST}
+      - RABBIT_USER=${ENV_RABBIT_USER}
+      - RABBIT_PASSWORD=${ENV_RABBIT_PASSWORD}
+    # volumes:
+    #   - ./config/firebase_config.json:/app/config/firebase_config.json
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - flashauth-network
+
+networks:
+  flashauth-network:
+    driver: bridge
 
 volumes:
   redis_data:
-  
-networks:
-  app-network:
-    driver: bridge
