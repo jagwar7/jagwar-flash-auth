@@ -20,7 +20,7 @@ pipeline{
         stage('#2. Build docker image'){
             steps{
                 echo "🛠️ Building docker image of Flash⚡Auth backend"
-                sh "docker build -t ${ECR_REPO_NAME}:latest"
+                sh "docker build -t ${ECR_REPO_NAME}:latest ."
             }
         }
 
