@@ -48,8 +48,32 @@ pipeline{
                     echo "Fetching credentials from AWS parameter store..."
                     def getParam = {name ->
                         sh(script: "aws ssm get-parameter --name '$name' --with-decryption --query 'Parameter.Value' --output text --region ${AWS_REGION}", returnStdout: true).trim()
-                        
                     }
+
+                    def rabbitHost      = getParam('/prod/notification-service/RABBIT_HOST')
+                    echo "rabbit host: ${rabbitHost} "
+
+                    def rabbitUsername  = getParam('/prod/notification-service/RABBIT_USERNAME')
+                    echo "rabbitUsername: ${rabbitUsername} "
+
+                    def rabbitPassword  = getParam('/prod/notification-service/RABBIT_PASSWORD')
+                    echo "rabbitPassword: ${rabbitPassword} "
+
+                    def mongodbURI      = getParam('jagwar_mongo_uri')
+                    echo "MongoDB: ${mongodbURI}"
+
+                    def firebaseConfig  = getParam('firebase_config.json')
+                    echo "Firebase Config: ${firebaseConfig}"
+
+                    sh """
+                    aws ssm send-command --instance-ids ${FLASHAUTH_INSTANCE_ID} \
+                    --document-name "AWS-RunShellScript" \
+                    --parameters 'commands=[
+                        \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\",
+                        \"mkdir -p /home/ubuntu/flashauth-backend\"
+                    ]'
+                    """
+
                 }
             }
         }
