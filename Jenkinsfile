@@ -65,17 +65,49 @@ pipeline{
                     def firebaseConfig  = getParam('firebase_config.json')
                     echo "Firebase Config: ${firebaseConfig}"
 
+                    def jwtSecretKey    = getParam('/prod/FLASHAUTH_BACKEND/jwt_secret_key')
+                    echo "JWT Secret Key: ${jwtSecretKey}"
+
                     sh """
                     aws ssm send-command --instance-ids ${FLASHAUTH_INSTANCE_ID} \
                     --document-name "AWS-RunShellScript" \
                     --parameters 'commands=[
                         \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\",
-                        \"mkdir -p /home/ubuntu/flashauth-backend\"
+                        \"mkdir -p /home/ubuntu/flashauth-backend\",
+                        \"cat <<EOF> /home/ubuntu/flashauth-backend/firebase_config.json
+                        ${firebaseConfig}
+                        EOF\",
+                        \"cat <<EOF> /home/ubuntu/flashauth-backend/.env
+                        ENV_CONTAINER_PORT=5800
+                        ENV_SYSTEM_PORT=5850
+                        ENV_RABBIT_HOST=${rabbitHost}
+                        ENV_RABBIT_USER=${rabbitUsername}
+                        ENV_RABBIT_PASSWORD=${rabbitPassword}
+                        MONGODB_CONNECTION_URL=${mongodbURI}
+                        JWT_SECRET_KEY=${jwtSecretKey}
+                        EOF\",
+                        \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
+                        \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\",
+                        \"cd /home/ubuntu/flashauth-backend && ls -la && docker ps -a\"
                     ]'
                     """
 
                 }
             }
+        }
+    }
+
+    post{
+        success{
+            echo "🌐🚀 Successfully deployed Flash⚡Auth Backend"
+        }
+        failure{
+            echo "❌⛔ Failed to deploy Flash⚡Auth, Check Jenkins pipeline log"
+        }
+        always{
+            echo "🧹🧼 Cleaning up local built image..."
+            sh "docker rmi ${ECR_REPO_NAME}:latest || true"
+            sh "docker rmi ${ECR_REPO_URL}:latest || true"
         }
     }
 }
