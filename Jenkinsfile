@@ -93,7 +93,10 @@ JWT_SECRET_KEY=${jwtSecretKey}
 ENV_DOCKER_IMAGE_URL=${ECR_REPO_URL}:latest
 EOF\",
                         \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
-                        \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\"
+                        \"sudo chown -R ubuntu:ubuntu /home/ubuntu/flashauth-backend\",
+                        \"cd /home/ubuntu/flashauth-backend\", 
+                        \"sudo docker compose pull\", 
+                        \"sudo docker compose up -d\"
                     ]'
                     """
                 }
