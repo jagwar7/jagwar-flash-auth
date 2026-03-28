@@ -68,30 +68,31 @@ pipeline{
                     def jwtSecretKey    = getParam('/prod/FLASHAUTH_BACKEND/jwt_secret_key')
                     echo "JWT Secret Key: ${jwtSecretKey}"
 
+                    def encodedFirebase = firebaseConfig.bytes.encodeBase64().toString()
                     sh """
-                    aws ssm send-command --instance-ids ${FLASHAUTH_INSTANCE_ID} \
-                    --document-name "AWS-RunShellScript" \
-                    --parameters 'commands=[
-                        \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\",
-                        \"mkdir -p /home/ubuntu/flashauth-backend\",
-                        \"cat <<EOF> /home/ubuntu/flashauth-backend/firebase_config.json
-                        ${firebaseConfig}
-                        EOF\",
-                        \"cat <<EOF> /home/ubuntu/flashauth-backend/.env
-                        ENV_CONTAINER_PORT=5800
-                        ENV_SYSTEM_PORT=5850
-                        ENV_RABBIT_HOST=${rabbitHost}
-                        ENV_RABBIT_USER=${rabbitUsername}
-                        ENV_RABBIT_PASSWORD=${rabbitPassword}
-                        MONGODB_CONNECTION_URL=${mongodbURI}
-                        JWT_SECRET_KEY=${jwtSecretKey}
-                        EOF\",
-                        \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
-                        \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\",
-                        \"cd /home/ubuntu/flashauth-backend && ls -la && docker ps -a\"
-                    ]'
-                    """
-
+                        aws ssm send-command \
+                        --instance-ids ${FLASHAUTH_INSTANCE_ID} \
+                        --region ${AWS_REGION} \
+                        --document-name "AWS-RunShellScript" \
+                        --parameters 'commands=[
+                            \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\",
+                            \"mkdir -p /home/ubuntu/flashauth-backend\",
+                            \"echo ${encodedFirebase} | base64 -d > /home/ubuntu/flashauth-backend/firebase_config.json\",
+                            \"cat <<EOF > /home/ubuntu/flashauth-backend/.env
+                    ENV_CONTAINER_PORT=5800
+                    ENV_SYSTEM_PORT=5850
+                    ENV_RABBIT_HOST=${rabbitHost}
+                    ENV_RABBIT_USER=${rabbitUsername}
+                    ENV_RABBIT_PASSWORD=${rabbitPassword}
+                    MONGODB_CONNECTION_URL=${mongodbURI}
+                    JWT_SECRET_KEY=${jwtSecretKey}
+                    ECR_IMAGE_URL=${ECR_REPO_URL}:latest
+                    EOF\",
+                            \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
+                            \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\",
+                            \"cd /home/ubuntu/flashauth-backend && ls -la && docker ps -a\"
+                        ]'
+                        """
                 }
             }
         }
