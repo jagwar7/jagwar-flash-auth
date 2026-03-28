@@ -93,7 +93,6 @@ pipeline{
                             \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\"
                         ]'
                         """
-                    }
                 }
             }
         }
