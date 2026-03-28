@@ -78,6 +78,15 @@ pipeline{
                         --region ${AWS_REGION} \
                         --document-name "AWS-RunShellScript" \
                         --parameters 'commands=[
+                            \"sudo apt-get update -y\",
+                            \"sudo apt-get install -y docker.io\",
+                            \"sudo systemctl start docker\",
+                            \"sudo systemctl enable docker\",
+                            \"sudo usermod -aG docker ubuntu \",
+                            \"sudo rm -rf /home/ubuntu/.docker/cli-plugins\",
+                            \"mkdir -p /home/ubuntu/.docker/cli-plugins || true\",
+                            \"sudo curl -SL https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose\",
+                            \"sudo chmod +x /usr/local/bin/docker-compose\",
                             \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\",
                             \"mkdir -p /home/ubuntu/flashauth-backend\",
                             \"echo ${encodedFirebase} | base64 -d > /home/ubuntu/flashauth-backend/firebase_config.json\",
@@ -92,7 +101,7 @@ pipeline{
                     ECR_IMAGE_URL=${ECR_REPO_URL}:latest
                     EOF\",
                             \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
-                            \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\"
+                            \"cd /home/ubuntu/flashauth-backend && sudo docker compose pull && sudo docker compose up -d\"
                         ]'
                         """
                 }
