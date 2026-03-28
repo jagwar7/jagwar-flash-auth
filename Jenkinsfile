@@ -90,7 +90,6 @@ ENV_RABBIT_USER=${rabbitUsername}
 ENV_RABBIT_PASSWORD=${rabbitPassword}
 MONGODB_CONNECTION_URL=${mongodbURI}
 JWT_SECRET_KEY=${jwtSecretKey}
-ECR_IMAGE_URL=${ECR_REPO_URL}:latest
 ENV_DOCKER_IMAGE_URL=${ECR_REPO_URL}:latest
 EOF\",
                         \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
