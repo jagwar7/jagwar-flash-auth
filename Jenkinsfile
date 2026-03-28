@@ -68,8 +68,9 @@ pipeline{
                     def jwtSecretKey    = getParam('/prod/FLASHAUTH_BACKEND/jwt_secret_key')
                     echo "JWT Secret Key: ${jwtSecretKey}"
 
-                    def encodedFirebase = firebaseConfig.bytes.encodeBase64().toString()
-                    sh """
+                    def encodedFirebase = firebaseConfig.getBytes("UTF-8").encodeBase64().toString()
+
+                        sh """
                         aws ssm send-command \
                         --instance-ids ${FLASHAUTH_INSTANCE_ID} \
                         --region ${AWS_REGION} \
@@ -89,10 +90,10 @@ pipeline{
                     ECR_IMAGE_URL=${ECR_REPO_URL}:latest
                     EOF\",
                             \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
-                            \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\",
-                            \"cd /home/ubuntu/flashauth-backend && ls -la && docker ps -a\"
+                            \"cd /home/ubuntu/flashauth-backend && docker compose pull && docker compose up -d\"
                         ]'
                         """
+                    }
                 }
             }
         }
