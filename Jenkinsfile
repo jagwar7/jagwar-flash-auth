@@ -68,8 +68,10 @@ pipeline{
                     def jwtSecretKey    = getParam('/prod/FLASHAUTH_BACKEND/jwt_secret_key')
                     echo "JWT Secret Key: ${jwtSecretKey}"
 
-                    def encodedFirebase = firebaseConfig.getBytes("UTF-8").encodeBase64().toString()
-
+                    def encodedFirebase = sh(
+                        script: "echo '${firebaseConfig}' | base64 -w 0",
+                        returnStdout: true
+                    ).trim()
                         sh """
                         aws ssm send-command \
                         --instance-ids ${FLASHAUTH_INSTANCE_ID} \
