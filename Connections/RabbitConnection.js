@@ -34,6 +34,7 @@ const PushNotificationToQueue=async(data)=>{
     }
 
     try {
+        console.log(`☑️🎟️ Notification Send request received for data : ${data}`)
         const {name, options} = queueConfig.EMAIL_CONFIG;
         await channel.assertQueue(name, options);   // VERIFY QUEUE SETUP
 

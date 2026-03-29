@@ -49,6 +49,7 @@ const SignUpWithJWT = async (req, res) => {
         welcome_mail_object.recipient.name = name;
         welcome_mail_object.payload.userName = name;
         welcome_mail_object.payload.welcomeLink = "https://flashauth.connectjagwar.online"
+        console.log(`🔁Attempting push notification event to RabbitMQ ${welcome_mail_object}`);
         PushNotificationToQueue(welcome_mail_object);
         return res.status(200).json(resObj);
     } catch (error) {
