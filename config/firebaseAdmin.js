@@ -5,7 +5,7 @@ const path = require('path');
 const serviceAccountPath = path.join(__dirname, 'firebase_config.json');
 
 admin.initializeApp({
-  credential: admin.credential.cert(require(serviceAccountPath)),
+  credential: admin.credential.cert(serviceAccountPath),
 });
 
 module.exports = admin;
