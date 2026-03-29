@@ -12,9 +12,9 @@ const ConnectToRabbit =async()=>{
         const protocol  = 'amqp';
         const hostIP    = process.env.RABBIT_HOST;
         const user      = process.env.RABBIT_USER;
-        const passwrod  = process.env.RABBIT_PASSWORD;
+        const password  = process.env.RABBIT_PASSWORD;
 
-        rabbitConnection = await rabbitProtocol.connect(`${protocol}://${user}:${passwrod}@${hostIP}:5672`);
+        rabbitConnection = await rabbitProtocol.connect(`${protocol}://${user}:${password}@${hostIP}:5672`);
         rabbitChannel = await rabbitConnection.createChannel();
         return {rabbitConnection, rabbitChannel};
     } catch (error) {
