@@ -45,6 +45,8 @@ const SignUpWithJWT = async (req, res) => {
         resObj.success = true;
         resObj.message = "Successfully signed up";
         resObj.data = jwtToken;
+        welcome_mail_object.recipient.email = email;
+        welcome_mail_object.recipient.name = name;
         welcome_mail_object.payload.userName = name;
         welcome_mail_object.payload.welcomeLink = "https://flashauth.connectjagwar.online"
         PushNotificationToQueue(welcome_mail_object);
@@ -56,6 +58,11 @@ const SignUpWithJWT = async (req, res) => {
         return res.status(500).json(resObj);
     }
 };
+
+
+
+
+
 
 const SignInWithJWT = async (req, res) => {
     const { email, password } = req.body;
