@@ -123,6 +123,6 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 process.on('unhandledRejection', (err) => {
-    console.error('❌ SERVER ERROR:', err.message, err.stack, new Date().toISOString());
+    console.error('❌ UNHANDLED SERVER ERROR:', err.message, err.stack, new Date().toISOString());
 });
 //------------------------------------------------------------------------------------------------------------------------

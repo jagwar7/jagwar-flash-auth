@@ -18,6 +18,9 @@ const ConnectToRabbit =async()=>{
 
         rabbitConnection = await rabbitProtocol.connect(`${protocol}://${user}:${password}@${hostIP}:5672`);
         rabbitChannel = await rabbitConnection.createChannel();
+
+        console.log(`🌐RABBIT CHANNEL : ${rabbitChannel}`)
+        console.log(`🌐RABBIT CONNECTION : ${rabbitConnection}`)
         
         return {rabbitConnection, rabbitChannel};
     } catch (error) {
