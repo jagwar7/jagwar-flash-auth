@@ -19,7 +19,7 @@ pipeline {
 
         stage('#2. Build') {
             steps {
-                echo "🛠️ Building image..."
+                echo "🛠️ Building Flash⚡Auth Backend Image..."
                 sh "docker build -t ${ECR_REPO_NAME}:latest ."
             }
         }
@@ -27,9 +27,12 @@ pipeline {
         stage('#3. Push') {
             steps {
                 script {
+                    echo "🔐 Logging into ECR and Pushing..."
                     sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
                     sh "docker tag ${ECR_REPO_NAME}:latest ${ECR_REPO_URL}:latest"
                     sh "docker push ${ECR_REPO_URL}:latest"
+                    
+                    echo "⏫ Uploading Compose file to S3..."
                     sh "aws s3 cp docker-compose.yml s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml" 
                 }
             }
@@ -38,6 +41,7 @@ pipeline {
         stage('#4. Deploy') {
             steps {
                 script {
+                    echo "📥 Fetching Secrets from Parameter Store..."
                     def getParam = { name ->
                         sh(script: "aws ssm get-parameter --name '$name' --with-decryption --query 'Parameter.Value' --output text --region ${AWS_REGION}", returnStdout: true).trim()
                     }
@@ -49,8 +53,13 @@ pipeline {
                     def firebaseConfig  = getParam('firebase_config.json')
                     def jwtSecretKey    = getParam('/prod/FLASHAUTH_BACKEND/jwt_secret_key')
 
-                    def encodedFirebase = sh(script: "echo '${firebaseConfig}' | base64 -w 0", returnStdout: true).trim()
+                    // Securely encode Firebase JSON to avoid shell corruption of \n characters
+                    def encodedFirebase = sh(
+                        script: "cat <<'EOF' | base64 -w 0\n${firebaseConfig}\nEOF",
+                        returnStdout: true
+                    ).trim()
                     
+                    echo "🚀 Sending Deployment Command to EC2..."
                     sh """
                     aws ssm send-command \
                     --instance-ids ${FLASHAUTH_INSTANCE_ID} \
@@ -59,7 +68,12 @@ pipeline {
                     --parameters 'commands=[
                         \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\",
                         \"mkdir -p /home/ubuntu/flashauth-backend\",
-                        \"echo ${encodedFirebase} | base64 -d > /home/ubuntu/flashauth-backend/firebase_config.json\",
+                        
+                        # Using a temp .base64 file to ensure safe decoding of the JSON
+                        \"echo ${encodedFirebase} > /home/ubuntu/flashauth-backend/config.base64\",
+                        \"base64 -d /home/ubuntu/flashauth-backend/config.base64 > /home/ubuntu/flashauth-backend/firebase_config.json\",
+                        \"rm /home/ubuntu/flashauth-backend/config.base64\",
+
                         \"cat <<EOF > /home/ubuntu/flashauth-backend/.env
 ENV_CONTAINER_PORT=5800
 ENV_SYSTEM_PORT=5850
@@ -82,9 +96,14 @@ EOF\",
     }
 
     post {
-        success { echo "🌐🚀 Flash⚡Auth Deployed Successfully" }
-        failure { echo "❌⛔ Failed to Deploy Flash⚡Auth" }
+        success {
+            echo "🌐🚀 Flash⚡Auth Backend is LIVE"
+        }
+        failure {
+            echo "❌⛔ Deployment Failed. Check the SSM Agent logs on EC2 or Jenkins Console."
+        }
         always {
+            echo "🧹 Cleaning up local images..."
             sh "docker rmi ${ECR_REPO_NAME}:latest || true"
             sh "docker rmi ${ECR_REPO_URL}:latest || true"
         }
