@@ -14,8 +14,11 @@ const ConnectToRabbit =async()=>{
         const user      = process.env.RABBIT_USER;
         const password  = process.env.RABBIT_PASSWORD;
 
+        console.log(`RABBIT CONFIGS : ${hostIP} , ${user} , ${password}`);
+
         rabbitConnection = await rabbitProtocol.connect(`${protocol}://${user}:${password}@${hostIP}:5672`);
         rabbitChannel = await rabbitConnection.createChannel();
+        
         return {rabbitConnection, rabbitChannel};
     } catch (error) {
         console.log(`❌⛔ Connection to rabbit failed : ${error.message}`);
