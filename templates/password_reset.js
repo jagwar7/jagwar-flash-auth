@@ -1,4 +1,4 @@
-const mail_object = {
+const password_reset_mail_object = {
   notificationType: "EMAIL",
   templateName: "PASSWORD_RESET",
   recipient: {
@@ -12,4 +12,4 @@ const mail_object = {
   }
 }
 
-module.exports = mail_object;
+module.exports = password_reset_mail_object;

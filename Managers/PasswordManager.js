@@ -2,7 +2,7 @@ const User = require('../models/User.model');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const { PushNotificationToQueue} = require('../Connections/RabbitConnection');
-const mail_object = require('../templates/password_reset');
+const password_reset_mail_object = require('../templates/password_reset');
 
 
 const RequestPasswordReset = async(req, res)=>{
@@ -22,12 +22,12 @@ const RequestPasswordReset = async(req, res)=>{
         await user.save();
         const resetURL = `${process.env.HOST_SERVER_URL}/reset-password?token=${token}`
 
-        mail_object.email = email;
-        mail_object.recipient.name = user.name;
-        mail_object.payload.resetLink = resetURL;
-        console.log(mail_object);
+        password_reset_mail_object.email = email;
+        password_reset_mail_object.recipient.name = user.name;
+        password_reset_mail_object.payload.resetLink = resetURL;
+        console.log(password_reset_mail_object);
 
-        PushNotificationToQueue(mail_object);
+        PushNotificationToQueue(password_reset_mail_object);
 
         res.json({msg: "Password reset link has been sent. Please check your mail box"});
     } catch (error) {

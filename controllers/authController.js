@@ -3,6 +3,8 @@ const { userSchema } = require('../models/User.model');
 const { body, validationResult } = require('express-validator');
 const firebaseAdmin = require('../config/firebaseAdmin');
 const { generateJWT } = require('../utils/jwtConfig');
+const { PushNotificationToQueue } = require('../Connections/RabbitConnection');
+const welcome_mail_object = require('../templates/welcome_letter');
 
 
 const resObj = {
@@ -43,6 +45,9 @@ const SignUpWithJWT = async (req, res) => {
         resObj.success = true;
         resObj.message = "Successfully signed up";
         resObj.data = jwtToken;
+        welcome_mail_object.payload.userName = name;
+        welcome_mail_object.payload.welcomeLink = "https://flashauth.connectjagwar.online"
+        PushNotificationToQueue(welcome_mail_object);
         return res.status(200).json(resObj);
     } catch (error) {
         resObj.success = false;
