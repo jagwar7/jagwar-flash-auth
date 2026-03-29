@@ -31,7 +31,7 @@ const ConnectToRabbit =async()=>{
 
 
 const PushNotificationToQueue=async(data)=>{
-    if(!channel){
+    if(!rabbitChannel){
         console.log(`❌⛔ Rabbit MQ Connection is not initialized`);
         throw error;
     }
@@ -39,11 +39,11 @@ const PushNotificationToQueue=async(data)=>{
     try {
         console.log(`☑️🎟️ Notification Send request received for data : ${data}`)
         const {name, options} = queueConfig.EMAIL_CONFIG;
-        await channel.assertQueue(name, options);   // VERIFY QUEUE SETUP
+        await rabbitChannel.assertQueue(name, options);   // VERIFY QUEUE SETUP
 
         const bufferData = Buffer.from(JSON.stringify(data));
 
-        return channel.sendToQueue(name, bufferData, {persistent: true});
+        return rabbitChannel.sendToQueue(name, bufferData, {persistent: true});
     } catch (error) {
         console.log("❌⛔ Failed to push notification to Rabbit MQ");
         return false;
