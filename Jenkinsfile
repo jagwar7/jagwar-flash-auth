@@ -53,7 +53,7 @@ pipeline {
                     def firebaseConfig  = getParam('firebase_config.json')
                     def jwtSecretKey    = getParam('/prod/FLASHAUTH_BACKEND/jwt_secret_key')
 
-                    // Securely encode Firebase JSON to avoid shell corruption of \n characters
+                    // Securely encode Firebase JSON
                     def encodedFirebase = sh(
                         script: "cat <<'EOF' | base64 -w 0\n${firebaseConfig}\nEOF",
                         returnStdout: true
@@ -68,12 +68,9 @@ pipeline {
                     --parameters 'commands=[
                         \"aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com\",
                         \"mkdir -p /home/ubuntu/flashauth-backend\",
-                        
-                        # Using a temp .base64 file to ensure safe decoding of the JSON
                         \"echo ${encodedFirebase} > /home/ubuntu/flashauth-backend/config.base64\",
                         \"base64 -d /home/ubuntu/flashauth-backend/config.base64 > /home/ubuntu/flashauth-backend/firebase_config.json\",
                         \"rm /home/ubuntu/flashauth-backend/config.base64\",
-
                         \"cat <<EOF > /home/ubuntu/flashauth-backend/.env
 ENV_CONTAINER_PORT=5800
 ENV_SYSTEM_PORT=5850
