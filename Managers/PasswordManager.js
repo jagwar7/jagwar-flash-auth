@@ -1,7 +1,8 @@
 const User = require('../models/User.model');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
-const nodemailer = require('nodemailer');
+const { PushNotificationToQueue} = require('../Connections/RabbitConnection');
+const password_reset_mail_object = require('../templates/password_reset');
 
 
 const RequestPasswordReset = async(req, res)=>{
@@ -21,18 +22,13 @@ const RequestPasswordReset = async(req, res)=>{
         await user.save();
         const resetURL = `${process.env.HOST_SERVER_URL}/reset-password?token=${token}`
 
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
-            auth: {
-                user: process.env.MAIL_USER,
-                pass: process.env.MAIL_PASSWORD
-            }
-        });
-        await transporter.sendMail({
-            to: user.email,
-            subject: "Password Reset",
-            html: `<p>Click <a href="${resetURL}">here</a> to reset your password. This link will expire in 10 minutes.</p>`
-        });
+        password_reset_mail_object.email = email;
+        password_reset_mail_object.recipient.name = user.name;
+        password_reset_mail_object.payload.resetLink = resetURL;
+        console.log(password_reset_mail_object);
+
+        PushNotificationToQueue(password_reset_mail_object);
+
         res.json({msg: "Password reset link has been sent. Please check your mail box"});
     } catch (error) {
         console.log(error);

@@ -3,15 +3,17 @@ const mongoose = require('mongoose');
 const AuthRouter = require('./routes/AuthRouter');
 const FlashAuthRouter = require('./routes/FlashAuthRouter');
 const CredentialsRouter = require('./routes/CredentialsRouter');
-const redisClient = require('./redis/client')
+const {RedisConnectionSetup, connectToRedis} = require('./Connections/RedisConnection')
 require('dotenv').config();
 const cors = require('cors'); 
+const FlashAuthDBConnection  = require('./Connections/MongoDBConnection');
+const { ConnectToRabbit } = require('./Connections/RabbitConnection');
 const server = express();
 
 // Debug mode
 const debug = true;
 server.use((req, res, next) => {
-    if (debug) console.log(`🌐 Incoming request: ${req.method} ${req.originalUrl} at ${new Date().toISOString()}`);
+    if (debug) console.log(`🌐 Incoming request: ${req.method} ${req.originalUrl} at ${new Date().toLocaleTimeString()}`);
     next();
 });
 
@@ -38,25 +40,21 @@ server.use(
 
 // MONGOOSE CONNECTION SETUP----------------------------------------------------------------------------------------------
 const startTime = Date.now();
-const FlashAuthDB = mongoose.createConnection(process.env.MONGODB_CONNECTION_URL, {
-    maxPoolSize: 5,
-    serverSelectionTimeoutMS: 10000,
-    connectTimeoutMS: 5000, // CONNECTION TIMEOUT
-    autoIndex: false, 
+const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
+        maxPoolSize: 5,
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 5000, // CONNECTION TIMEOUT
+        autoIndex: false, 
 });
 
 
+    FlashAuthDB.on('connecting', () => console.log("🔄 Connecting to FlashAuth database..."));
+    FlashAuthDB.on('connected', () => console.log(`🌐✅ #3. Connected to FlashAuth database in ${Date.now() - startTime} ms`));
+    FlashAuthDB.on('error', (error) => console.error("❌ Connection failed to FlashAuth DB:", error.message, new Date().toISOString()));
+    FlashAuthDB.on('disconnected', () => console.warn("⚠️ Disconnected from FlashAuth DB at", new Date().toISOString()));
+    FlashAuthDB.on('reconnected', () => console.log("🔄 Reconnected to FlashAuth DB at", new Date().toISOString()));
 
-
-
-FlashAuthDB.on('connecting', () => console.log("🔄 Connecting to FlashAuth database..."));
-FlashAuthDB.on('connected', () => console.log(`✅ Connected to FlashAuth database in ${Date.now() - startTime}ms`));
-FlashAuthDB.on('error', (error) => console.error("❌ Connection failed to FlashAuth DB:", error.message, new Date().toISOString()));
-FlashAuthDB.on('disconnected', () => console.warn("⚠️ Disconnected from FlashAuth DB at", new Date().toISOString()));
-FlashAuthDB.on('reconnected', () => console.log("🔄 Reconnected to FlashAuth DB at", new Date().toISOString()));
-
-FlashAuthDB.asPromise().catch((err) => console.error("❌ FlashAuthDB init error:", err.message, new Date().toISOString()));
-
+    FlashAuthDB.asPromise().catch((err) => console.error("❌ FlashAuthDB init error:", err.message, new Date().toISOString()));
 
 
 
@@ -69,7 +67,7 @@ const ensureConnection = async (req, res, next) => {
     req.db = FlashAuthDB;
     next();
   } catch (err) {
-    next(err); // Let Express error handler catch it
+    next(err);
   }
 };
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -80,28 +78,28 @@ const ensureConnection = async (req, res, next) => {
 
 
 // REDIS CONNECTION--------------------------------------------------------------------------------------------------------------------------------------------------
-async function initializeRedis() {
-    try {
-        // Wait a bit for Redis to connect
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        if (!redisClient.isOpen || !redisClient.isReady) {
-            console.log('⚠️ Redis not connected, attempting to reconnect...');
-            await redisClient.connect();
-        }
-        console.log('✅ Redis is ready');
-    } catch (error) {
-        console.log('⚠️ Continuing without Redis cache:', error.message);
-    }
-}
 
+const port = process.env.CONTAINER_PORT;
+const startServer = async () => {
+    // START REDIS FIRST
+    RedisConnectionSetup(startTime).then(()=>{
+        ConnectToRabbit().then(()=>{
+            const runningServer = server.listen(port, ()=>{
+              console.log(`🌐✅ #3. Server started inside docker port : ${port} in ${Date.now()-startTime} ms`);
+            });
+            
+            runningServer.on('error', (err)=>{
+              console.log(`❌⚠️ #3. Critical server failure: ${err.message}`);
+            });
+        }).catch((err)=>{
+            console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
+        });
+    }).catch((err)=>{
+        console.log(`❌⚠️#1. Critical failure on redis`);
+    })
 
-initializeRedis().then(() => {
-    const port = 5900;
-    server.listen(port, () => {
-        console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
-    });
-});
+};
+startServer();
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -110,6 +108,9 @@ initializeRedis().then(() => {
 
 
 // ROUTES-----------------------------------------------------------------------------------------------------------------
+server.get('/', (req, res)=>{
+  res.status(200).send("welcome to flashauth")
+})
 server.use('/api/auth', ensureConnection, AuthRouter);
 server.use('/api/flashauth', ensureConnection, FlashAuthRouter);
 server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
@@ -120,17 +121,8 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 
-// RUN EXPRESS SERVER-----------------------------------------------------------------------------------------------------
-
-
-
-const port = 5900
-server.listen(port, () => {
-    console.log(`Server running on port: ${port} at ${new Date().toISOString()}`);
-});
-
 
 process.on('unhandledRejection', (err) => {
-    console.error('❌ SERVER ERROR:', err.message, err.stack, new Date().toISOString());
+    console.error('❌ UNHANDLED SERVER ERROR:', err.message, err.stack, new Date().toISOString());
 });
 //------------------------------------------------------------------------------------------------------------------------

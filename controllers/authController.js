@@ -3,6 +3,8 @@ const { userSchema } = require('../models/User.model');
 const { body, validationResult } = require('express-validator');
 const firebaseAdmin = require('../config/firebaseAdmin');
 const { generateJWT } = require('../utils/jwtConfig');
+const { PushNotificationToQueue } = require('../Connections/RabbitConnection');
+const welcome_mail_object = require('../templates/welcome_letter');
 
 
 const resObj = {
@@ -43,6 +45,12 @@ const SignUpWithJWT = async (req, res) => {
         resObj.success = true;
         resObj.message = "Successfully signed up";
         resObj.data = jwtToken;
+        welcome_mail_object.recipient.email = email;
+        welcome_mail_object.recipient.name = name;
+        welcome_mail_object.payload.userName = name;
+        welcome_mail_object.payload.welcomeLink = "https://flashauth.connectjagwar.online"
+        console.log(`🔁Attempting push notification event to RabbitMQ ${welcome_mail_object}`);
+        PushNotificationToQueue(welcome_mail_object);
         return res.status(200).json(resObj);
     } catch (error) {
         resObj.success = false;
@@ -51,6 +59,11 @@ const SignUpWithJWT = async (req, res) => {
         return res.status(500).json(resObj);
     }
 };
+
+
+
+
+
 
 const SignInWithJWT = async (req, res) => {
     const { email, password } = req.body;
@@ -145,7 +158,6 @@ const SignInWithGoogle = async (req, res) => {
         return res.status(500).json({success: false, message: "INTERNAL SERVER ERROR: Contact Admin" });
     }
 };
-
 // ------------------------------------------------ GOOGLE SIGN UP AND SIGN IN---------------------------------------------------------
 
 

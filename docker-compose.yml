@@ -1,27 +1,50 @@
 services:
-  backend:
-    build: 
-      context: ./server
-    container_name: express-backend
-    ports:
-      - "5900:5900"
-    environment:
-      - NODE_ENV=development
-      - MONGODB_URI=mongodb+srv://jagwarauth:FuckYouSabnur@jagwarcluster.jsrzyzq.mongodb.net/test?retryWrites=true&w=majority&appName=jagwarcluster
-      - REDIS_URL=redis://redis:6379  
-    depends_on:
-      - redis
-    volumes:
-      - ./server:/app
-      - /app/node_modules
-
   redis:
     image: redis:7-alpine
-    container_name: redis-cache
-    ports:
-      - "6379:6379"
+    container_name: redis-container
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flashauth-network
+
+  backend:
+    image: ${ENV_DOCKER_IMAGE_URL}
+    container_name: flashauth-container
+    restart: always
+    ports:
+      - "${ENV_SYSTEM_PORT}:${ENV_CONTAINER_PORT}" # INCOMING TRAFFIC ON : SYSTEM_PORT ----FORWARDED---> CONTAINER_PORT 
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - CONTAINER_PORT=${ENV_CONTAINER_PORT}  #  DOCKER CONTAINER PORT <----- ENV_CONTAINER_PORT
+      - REDIS_URL=redis://redis-container:6379
+      # - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
+      - RABBIT_HOST=${ENV_RABBIT_HOST}
+      - RABBIT_USER=${ENV_RABBIT_USER}
+      - RABBIT_PASSWORD=${ENV_RABBIT_PASSWORD}
+    volumes:
+      - ./firebase_config.json:/app/config/firebase_config.json # HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - flashauth-network
+
+networks:
+  flashauth-network:
+    driver: bridge
 
 volumes:
   redis_data:
