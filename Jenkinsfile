@@ -82,8 +82,8 @@ EOF\",
     }
 
     post {
-        success { echo "🌐🚀 Deployed Successfully" }
-        failure { echo "❌⛔ Deployment Failed" }
+        success { echo "🌐🚀 Flash⚡Auth Deployed Successfully" }
+        failure { echo "❌⛔ Failed to Deploy Flash⚡Auth" }
         always {
             sh "docker rmi ${ECR_REPO_NAME}:latest || true"
             sh "docker rmi ${ECR_REPO_URL}:latest || true"
