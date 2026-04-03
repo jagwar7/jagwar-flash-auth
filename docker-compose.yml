@@ -19,7 +19,7 @@ services:
       - flashauth-network
 
   backend:
-    image: ${ENV_DOCKER_IMAGE_URL}
+    image: flash-auth-app:v1
     container_name: flashauth-container
     restart: always
     ports:
@@ -34,8 +34,8 @@ services:
       - RABBIT_HOST=${ENV_RABBIT_HOST}
       - RABBIT_USER=${ENV_RABBIT_USER}
       - RABBIT_PASSWORD=${ENV_RABBIT_PASSWORD}
-    volumes:
-      - ./firebase_config.json:/app/config/firebase_config.json # HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
+    # volumes:
+    #   - ./firebase_config.json:/app/config/firebase_config.json # HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
     depends_on:
       redis:
         condition: service_healthy

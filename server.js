@@ -31,6 +31,8 @@ server.use(
       return callback(null, origin);
     },
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-AuthProvider'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   })
 );
 
@@ -60,13 +62,22 @@ const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
 
 // DATABASE CONNENTION HANDLER---------------------------------------------------------------------------------------------------------------------------------------
 const ensureConnection = async (req, res, next) => {
+  console.log(`Database state: ${FlashAuthDB.readyState}`)
   try {
-    if (FlashAuthDB.readyState !== 1) {
-      return res.status(503).json({ err: "Database is not ready" });
+    if (FlashAuthDB.readyState === 1) {
+      req.db = FlashAuthDB;
+      return next();
     }
-    req.db = FlashAuthDB;
-    next();
+    const stateMap = {
+      0 : 'Disconnected',
+      1 : 'Connecting',
+      3 : 'Disconnecting'
+    }
+    const status = stateMap[FlashAuthDB.readyState] || 'Unknown';
+    console.warn(`⚠️⛔ Database is not ready : ${status}`);
+    return res.status(503).json({success: false, message: `Database status : ${status}. `});
   } catch (err) {
+    console.error(`Middleware Error: `, err);
     next(err);
   }
 };
@@ -83,17 +94,18 @@ const port = process.env.CONTAINER_PORT;
 const startServer = async () => {
     // START REDIS FIRST
     RedisConnectionSetup(startTime).then(()=>{
-        ConnectToRabbit().then(()=>{
-            const runningServer = server.listen(port, ()=>{
+        // ConnectToRabbit().then(()=>{
+            
+        // }).catch((err)=>{
+        //     console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
+        // });
+        const runningServer = server.listen(port, ()=>{
               console.log(`🌐✅ #3. Server started inside docker port : ${port} in ${Date.now()-startTime} ms`);
             });
             
             runningServer.on('error', (err)=>{
               console.log(`❌⚠️ #3. Critical server failure: ${err.message}`);
             });
-        }).catch((err)=>{
-            console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
-        });
     }).catch((err)=>{
         console.log(`❌⚠️#1. Critical failure on redis`);
     })
