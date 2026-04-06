@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import  firebaseAdmin  from '../config/firebaseAdmin.js'
 import { Request, Response, NextFunction } from 'express';
 import {ITokenVerifier} from '../Interface/ITokenVerifier.ts'
@@ -55,20 +55,23 @@ export class GoogleTokenVerifier implements ITokenVerifier{
 
 export class JWTTokenVerifier implements ITokenVerifier{
     async VerifyToken(req: IAuthenticateRequest, res: Response, token: string, next: NextFunction): Promise<any> {
+        console.log(`⛔Attempting JWT verification in middleware`)
         try{
-            const decodedToken:JWTUser = jwt.verify(token, process.env.JWT_SECRET_KEY) as JWTUser;
+            const decodedToken:any = jwt.verify(token, process.env.JWT_SECRET_KEY) ;
             if(!decodedToken){
-                return res.status(401).json({success: false, message: "Missing token"});
+                console.log(`❌#1: Token verification failed`);
+                return res.json(new ResponseData(false, null, "CLIENT ERROR: Token verification failed, Error: JWT_verification#1", 401));
             }
             req.user = {
-                id: decodedToken.id,
-                email: decodedToken.email,
-                name: decodedToken.name,
-                authType: AuthType.local
+                id:         decodedToken.id,
+                email:      decodedToken.email,
+                name:       decodedToken.name,
+                authType:   AuthType.local
             };
+            console.log(`🎟️#2: decoded user data: ${req.user}`);
             next();
-        }catch(err){
-            
+        }catch(err:any){  
+            console.log(`🎟️Failed to verify token: ${err.name} msg: ${err.message}`)
             res.status(401).json({success: false, message: "Invalid token"});
         }
     }
@@ -98,13 +101,15 @@ export const HandleTokenVerification = (req, res, next): any=>{
 
     const authType = req.header('X-AuthProvider');
     console.log(`🎟️#2: AuthType : ${authType} `);
+
+    token = token.replace(`Bearer ${authType}:`, '');
+    console.log(token);
     
     const verifier:ITokenVerifier = authVerifierMap.get(authType as AuthType);
     if(!verifier){
         return res.json(new ResponseData(false, null, "Unsupported auth provider", 401));
     }
     verifier.VerifyToken(req, res, token, next);
-
 }
 
 

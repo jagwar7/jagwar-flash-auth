@@ -49,7 +49,7 @@ export class GoogleAuthStrategy implements AuthStrategy{
                 }
                 console.log('User already exist: ' , userObject);
 
-                const jwtToken = generateJWT(userObject);
+                const jwtToken:string = generateJWT(userObject);
                 return new ResponseData(true, jwtToken, "Successfully signed in", 200);
             }
 
@@ -64,7 +64,7 @@ export class GoogleAuthStrategy implements AuthStrategy{
             await newUser.save();
             console.log(`Saved User: ${newUser}`);
             const userData = new UserData(newUser.id, newUser.name, newUser.email, newUser.authType as AuthType);
-            const jwtToken = generateJWT(userData); // SIGN JWT
+            const jwtToken:string = generateJWT(userData); // SIGN JWT
             console.log(`JWT SIGNED TOKEN : ${jwtToken}`);
 
             return new ResponseData(true, jwtToken, "Successfully signed up", 201);
