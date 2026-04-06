@@ -13,4 +13,4 @@ const welcome_mail_object = {
   }
 }
 
-module.exports = welcome_mail_object;
+export default welcome_mail_object;

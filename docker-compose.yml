@@ -19,6 +19,7 @@ services:
       - flashauth-network
 
   backend:
+    build: .
     image: flash-auth-app:v1
     container_name: flashauth-container
     restart: always
@@ -27,7 +28,7 @@ services:
     env_file:
       - .env
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - CONTAINER_PORT=${ENV_CONTAINER_PORT}  #  DOCKER CONTAINER PORT <----- ENV_CONTAINER_PORT
       - REDIS_URL=redis://redis-container:6379
       # - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json

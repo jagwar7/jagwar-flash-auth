@@ -1,16 +1,18 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "jagwar": "nodemon --exec ts-node server.ts"
+    "dev": "tsx server.ts",
+    "jagwar": "tsx watch server.ts"
   },
   "keywords": [],
   "author": "Jagwar",
   "license": "ISC",
-  "description": "Flash Auth backend, that will do necessary authentication related operation behalf of client who will use FlashAuthSDK",
+  "description": "Flash Auth backend",
   "dependencies": {
     "amqplib": "^0.10.9",
     "bcrypt": "^6.0.0",
@@ -28,7 +30,8 @@
     "nodemon": "^3.1.10",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "redis": "^5.10.0"
+    "redis": "^5.10.0",
+    "tsx": "^4.19.2" 
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.8",
@@ -40,7 +43,6 @@
     "@types/nodemailer": "^7.0.11",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "typescript": "^5.4.0"
   }
 }

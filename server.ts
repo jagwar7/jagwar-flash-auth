@@ -1,13 +1,14 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const AuthRouter = require('./routes/AuthRouter');
-const FlashAuthRouter = require('./routes/FlashAuthRouter');
-const CredentialsRouter = require('./routes/CredentialsRouter');
-const {RedisConnectionSetup, connectToRedis} = require('./Connections/RedisConnection')
-require('dotenv').config();
-const cors = require('cors'); 
-const FlashAuthDBConnection  = require('./Connections/MongoDBConnection');
-const { ConnectToRabbit } = require('./Connections/RabbitConnection');
+import express from 'express';
+import mongoose from 'mongoose';
+import AuthRouter from './routes/AuthRouter.ts';
+import FlashAuthRouter from './routes/FlashAuthRouter.ts';
+import CredentialsRouter from './routes/CredentialsRouter.ts';
+import { RedisConnectionSetup, redisClient } from './Connections/RedisConnection.js';
+import 'dotenv/config';
+import cors from 'cors';
+// import FlashAuthDBConnection from './Connections/MongoDBConnection.js';
+import { ConnectToRabbit } from './Connections/RabbitConnection.js';
+
 const server = express();
 
 // Debug mode
@@ -42,12 +43,14 @@ server.use(
 
 // MONGOOSE CONNECTION SETUP----------------------------------------------------------------------------------------------
 const startTime = Date.now();
-const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
-        maxPoolSize: 5,
-        serverSelectionTimeoutMS: 10000,
-        connectTimeoutMS: 5000, // CONNECTION TIMEOUT
-        autoIndex: false, 
-});
+const mongoDBUrl = process.env.MONGODB_CONNECTION_URL;
+
+    const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
+            maxPoolSize: 5,
+            serverSelectionTimeoutMS: 10000,
+            connectTimeoutMS: 10000, // CONNECTION TIMEOUT
+            autoIndex: false, 
+    });
 
 
     FlashAuthDB.on('connecting', () => console.log("🔄 Connecting to FlashAuth database..."));
@@ -62,22 +65,13 @@ const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
 
 // DATABASE CONNENTION HANDLER---------------------------------------------------------------------------------------------------------------------------------------
 const ensureConnection = async (req, res, next) => {
-  console.log(`Database state: ${FlashAuthDB.readyState}`)
   try {
-    if (FlashAuthDB.readyState === 1) {
-      req.db = FlashAuthDB;
-      return next();
+    if (FlashAuthDB.readyState !== 1) {
+      return res.status(503).json({ err: "Error: Database is not ready" });
     }
-    const stateMap = {
-      0 : 'Disconnected',
-      1 : 'Connecting',
-      3 : 'Disconnecting'
-    }
-    const status = stateMap[FlashAuthDB.readyState] || 'Unknown';
-    console.warn(`⚠️⛔ Database is not ready : ${status}`);
-    return res.status(503).json({success: false, message: `Database status : ${status}. `});
+    req.db = FlashAuthDB;
+    next();
   } catch (err) {
-    console.error(`Middleware Error: `, err);
     next(err);
   }
 };
@@ -134,7 +128,11 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 
-process.on('unhandledRejection', (err) => {
-    console.error('❌ UNHANDLED SERVER ERROR:', err.message, err.stack, new Date().toISOString());
+process.on('unhandledRejection', (reason: unknown) => {
+  if(reason instanceof Error){
+    console.error('❌ UNHANDLED SERVER ERROR:', reason.message, reason.stack, new Date().toISOString());
+  }else{
+    console.error('❌⛔ UNHANDLED REJECTION', reason, new Date().toISOString());
+  }
 });
 //------------------------------------------------------------------------------------------------------------------------

@@ -1,9 +1,10 @@
 import * as jwt from 'jsonwebtoken';
-import  firebaseAdmin  from '../config/firebaseAdmin'
+import  firebaseAdmin  from '../config/firebaseAdmin.js'
 import { Request, Response, NextFunction } from 'express';
-import {ITokenVerifier} from '../Interface/ITokenVerifier'
-import { AuthType } from '../utils/AuthType';
-import { IAuthenticateRequest } from '../Interface/IAuthenticateRequest';
+import {ITokenVerifier} from '../Interface/ITokenVerifier.ts'
+import { AuthType } from '../utils/AuthType.ts';
+import { IAuthenticateRequest } from '../Interface/IAuthenticateRequest.ts';
+import { ResponseData } from '../utils/ResponseData.ts';
 
 
 
@@ -27,8 +28,13 @@ interface JWTUser extends jwt.JwtPayload{
 
 export class GoogleTokenVerifier implements ITokenVerifier{
     async VerifyToken(req: IAuthenticateRequest, res: Response, token:string, next: NextFunction): Promise<any>{
+        console.log(`🔁#1: Attempt google auth token verification`);
         try {
             const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+            if(!decodedToken){
+                console.log(`❌#2: Token verification failed`);
+                return res.status(500).json(new ResponseData(false, null, "CLIENT ERROR: No Google Auth token found. Error: verification#2", 500));
+            }
 
             req.user = {
                 id: decodedToken.uid,
@@ -36,12 +42,12 @@ export class GoogleTokenVerifier implements ITokenVerifier{
                 name: decodedToken.name,
                 authType: AuthType.google
             };
-            console.log(req.user);
+            console.log(`User data: ${req.user}`);
 
             next();
         } catch (error) {
-            console.log(error);
-            return res.status(401).json({msg: "Invalid or Expired sing in credentials"});
+            console.log(`⛔#3: Server error ${error}`);
+            return res.status(401).json(new ResponseData(false, null, "INTERNAL SERVER ERROR: verification#3", 500));
         }
     }
 }
@@ -83,15 +89,22 @@ authVerifierMap.set(AuthType.local,  new JWTTokenVerifier());
 export const HandleTokenVerification = (req, res, next): any=>{
     let token = req.header('Authorization');
     if(!token){
+        console.log(`⛔ #1: No token found`);
         return res.status(401).json({success: false, message: "No token passed on"});
     }
 
-    const authType = req.header('X-AuthProvider');
+    console.log(`🎟️#1: Auth Token: ${token}`);
 
-    const verifier:ITokenVerifier = authVerifierMap[authType]
+
+    const authType = req.header('X-AuthProvider');
+    console.log(`🎟️#2: AuthType : ${authType} `);
+    
+    const verifier:ITokenVerifier = authVerifierMap.get(authType as AuthType);
+    if(!verifier){
+        return res.json(new ResponseData(false, null, "Unsupported auth provider", 401));
+    }
     verifier.VerifyToken(req, res, token, next);
 
-    return res.status(401).json({success: false, message: "Unsupported login provider"});
 }
 
 

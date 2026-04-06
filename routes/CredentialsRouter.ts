@@ -1,18 +1,22 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const AuthProviderSwitcher = require('../middlewares/AuthMiddleware');
-const { UserCredentials } = require('../models/UserCredentials.model');
-const { Encrypt, Decrypt } = require('../utils/encryptions');
+
+import {HandleTokenVerification} from '../middlewares/AuthMiddleware.js';
+import { UserCredentials } from '../models/UserCredentials.model.js';
+import { Encrypt, Decrypt } from '../utils/encryptions.js';
+import { IAuthenticateRequest } from '../Interface/IAuthenticateRequest.ts';
+import { ResponseData } from '../utils/ResponseData.ts';
+
 
 
 
 // IT WILL BE CALLED WHEN FORM OPENS TO SUBMIT AND WILL BE FETCHED AND FORM DATA WILL BE POPULATED
-router.get('/get', AuthProviderSwitcher, async(req, res)=>{
+router.get('/get', HandleTokenVerification, async(req:IAuthenticateRequest, res)=>{
     try {
         const UserCredential = req.db.model('UserCredentials', UserCredentials);
         let creds = await UserCredential.findOne({owner: req.user.id});
         if(!creds){
-            return res.status(404).json({error: "No credentials found, Please add your credentials."});
+            return res.json(new ResponseData(false, null , "No credentials found, Please add your credentials.", 404));
         }
         creds.clientFrontEndURL = Decrypt(creds.clientFrontEndURL);
         creds.clientSecretKey = Decrypt(creds.clientSecretKey);
@@ -40,7 +44,7 @@ router.get('/get', AuthProviderSwitcher, async(req, res)=>{
 
 
 
-router.put('/update', AuthProviderSwitcher, async(req, res)=>{
+router.put('/update', HandleTokenVerification, async(req:IAuthenticateRequest, res)=>{
     try {
         let {clientFrontEndURL, clientPublicKey, clientSecretKey, clientMongoDbUri,
              googleClientId, googleClientSecret, tokenExpiryDuration} = req.body;
@@ -96,4 +100,4 @@ router.put('/update', AuthProviderSwitcher, async(req, res)=>{
     }
 });
 
-module.exports = router;
+export default router;

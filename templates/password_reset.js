@@ -12,4 +12,4 @@ const password_reset_mail_object = {
   }
 }
 
-module.exports = password_reset_mail_object;
+export default password_reset_mail_object;

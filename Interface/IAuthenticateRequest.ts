@@ -1,4 +1,4 @@
-import { IUserData } from "./IUserData";
+import { IUserData } from "./IUserData.ts";
 import { Request } from "express";
 
 export interface IAuthenticateRequest extends Request{

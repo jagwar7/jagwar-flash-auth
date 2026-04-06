@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-
+import mongoose from 'mongoose';
 
 const UserCredentials = new mongoose.Schema({
     owner: {type: mongoose.Schema.Types.ObjectId, required: true},
@@ -16,5 +15,5 @@ const UserCredentials = new mongoose.Schema({
     timestamps: true
 });
 
-module.exports = {UserCredentials};
+export {UserCredentials};
 

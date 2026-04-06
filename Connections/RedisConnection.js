@@ -1,4 +1,4 @@
-const redis = require('redis');
+import redis from 'redis';
 
 // INSTANTIATE REDIS
 const REDIS_URL = process.env.REDIS_URL;
@@ -13,7 +13,7 @@ redisClient.on('error', (err)=>{
 
 
 
-// CONNECTION ATTEMPT TO REDIS 
+// CONNECTION ATTEMPT TO REDIS ----------------------------------------------------------------------------
 const RedisConnectionSetup = async(startTime)=>{
     try {
         await redisClient.connect();
@@ -25,4 +25,4 @@ const RedisConnectionSetup = async(startTime)=>{
 }
 
 
-module.exports = {redisClient, RedisConnectionSetup};
+export {redisClient, RedisConnectionSetup};

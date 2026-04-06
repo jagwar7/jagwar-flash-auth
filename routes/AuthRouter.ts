@@ -1,12 +1,10 @@
-import {HandleTokenVerification} from '../middlewares/AuthMiddleware'
-const PasswordManager = require('../Managers/PasswordManager');
-
-
+import {HandleTokenVerification} from '../middlewares/AuthMiddleware.ts'
+import {RequestPasswordReset, ResetPassword} from '../Managers/PasswordManager.js';
 import {Router, Request, Response} from 'express';
-import { AuthType } from '../utils/AuthType';
-import { authFactory } from '../Authentication/AuthManager';
-import { ResponseData } from '../utils/ResponseData';
-import { IAuthenticateRequest } from '../Interface/IAuthenticateRequest';
+import { AuthType } from '../utils/AuthType.ts';
+import { authFactory } from '../Authentication/AuthManager.ts';
+import { ResponseData } from '../utils/ResponseData.ts';
+import { IAuthenticateRequest } from '../Interface/IAuthenticateRequest.ts';
 
 const authRouter = Router();
 
@@ -51,22 +49,21 @@ authRouter.post("/signup", async(req: Request, res: Response) =>{
  *  */ 
 
 authRouter.post("/signin", async(req: Request, res: Response) =>{
-    console.log(`LOG 1: Attempt to sign up with google...`)
+    console.log(`🔁#1: Attempt to sign up with google...`)
     try {
 
         const type = req.header('X-AuthProvider') as AuthType;
-        console.log(`LOG 2: AuthType from req.params: ${type} ...`)
+        console.log(`🎟️#2: AuthType from req.params: ${type} ...`)
 
         const authStrategy = authFactory.authMap.get(type);
-        // console.log(authStrategy.getAuthType());
 
         // IF NO AUTH STRATEGY ----> THEN RETURN NAGETIVE RESPONSE
         if(!authStrategy){
-            console.error(`Strategy not found`);
             const response = new ResponseData(false, null, "UNSUPPORTED AUTH PROVIDER", 400);
             return res.status(response.status).json(response);
         }
         console.log(`strategy: ${authStrategy.getAuthType()}`);
+        
         const result = await authStrategy.signup(req, res);
         return res.status(result.status).json(result);
     } catch (error) {
@@ -87,10 +84,10 @@ authRouter.get('/profile', HandleTokenVerification, (req:IAuthenticateRequest, r
 
 authRouter.post('/password-reset-request', (req, res, next) => {
     next();
-}, PasswordManager.RequestPasswordReset);
+}, RequestPasswordReset);
 
 authRouter.post('/reset-password', (req, res, next) => {
     next();
-}, PasswordManager.ResetPassword);
+}, ResetPassword);
 
-module.exports = authRouter;
+export default authRouter;

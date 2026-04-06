@@ -16,4 +16,4 @@ const QUEUE_CONFIG = {
     }
 };
 
-module.exports = QUEUE_CONFIG
+export default QUEUE_CONFIG;

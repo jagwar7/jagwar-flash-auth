@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { IAuthenticateRequest } from "./IAuthenticateRequest";
+import { IAuthenticateRequest } from "./IAuthenticateRequest.ts";
 
 
 export interface ITokenVerifier{

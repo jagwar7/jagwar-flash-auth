@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 const defaultUserSchema = new mongoose.Schema({
     name: {type: String, required: function(){return this.isNew}},
@@ -183,4 +183,4 @@ async function FetchProfile(clientMongoDbUri, userProfile){
     resObj.data = user;
     return resObj;
 }
-module.exports = {findOrCreate, TryLocalSignin, FetchProfile};
+export {findOrCreate, TryLocalSignin, FetchProfile};

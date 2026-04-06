@@ -1,19 +1,22 @@
-const express = require('express'); 
-const bcrypt = require('bcryptjs');
-const {OAuth2Client} = require('google-auth-library');
-const jwt = require('jsonwebtoken');
-const { findOrCreate, TryLocalSignin, FetchProfile} = require('../services/clientUserServices.js');
-const { UserCredentials } = require('../models/UserCredentials.model.js');
-const fs = require('fs').promises;
-const path = require('path');
-const { Decrypt } = require('../utils/encryptions.js');
-const dotenv = require('dotenv');
-const {getSiteData} = require('../utils/redisCache.js');
-const {localServer, renderServer} = require('../utils/constants.js')
+import { ResponseData } from '../utils/ResponseData.ts';
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
+import jwt from 'jsonwebtoken';
+import { findOrCreate, TryLocalSignin, FetchProfile } from '../services/clientUserServices.ts';
+import { UserCredentials } from '../models/UserCredentials.model.js';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { Decrypt } from '../utils/encryptions.js';
+import dotenv from 'dotenv';
+import { getSiteData } from '../utils/redisCache.js';
+import serverURL from '../utils/constants.js';
 
 dotenv.config();
 
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const successPagePath = path.join(__dirname, '../views/success.html');
 const failurePagePath = path.join(__dirname, '../views/faliure.html');
@@ -24,6 +27,7 @@ const failurePagePath = path.join(__dirname, '../views/faliure.html');
 
 let successPage;
 let failurePage;
+let _clientFrontEndURL;
 (async()=>{
   successPage = await fs.readFile(successPagePath, 'utf-8');
   failurePage = await fs.readFile(failurePagePath, 'utf-8');
@@ -43,25 +47,28 @@ const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
 
 
 
-// GET: SEND GOOGLE AUTH URL ---> FLASHAUTH-SDK
+
+/** 
+ *  FETCH GOOGLE AUTH URL AND HANDOVER IT TO FLASH AUTH SDK
+ */
+
 router.get('/google/url', async(req, res)=>{
     const clientPublicKey = req.header('X-Client-Id');
     try {
         if(!clientPublicKey){
-            return res.status(400).json({success: false, message: "CLIENT ERROR: Missing client public key, Contact Admin"});
+            const response = new ResponseData(false, null, "CLIENT ERROR: Missing client public key", 400);
+            return res.json(response);
         }
 
-        // FIND USER CREDENTIALS 
-        // const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
-        // const siteData = await userCredentialCollection.findOne({clientPublicKey: clientPublicKey});
         const siteData = await getSiteData(clientPublicKey, req.db);
 
         if(!siteData){
-            return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Site data not found, Contact Admin"});
+            return res.json(new ResponseData(false, null, "CLIENT ERROR: There is a problem with credentials", 400));
         }
 
-        let {googleClientId, googleClientSecret} = siteData;  
 
+        let {googleClientId, googleClientSecret, clientFrontEndURL} = siteData;  
+        _clientFrontEndURL = clientFrontEndURL;
         googleClientId = Decrypt(googleClientId);
         googleClientSecret = Decrypt(googleClientSecret);
 
@@ -72,7 +79,7 @@ router.get('/google/url', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            `${localServer}/api/flashauth/google/callback`
+            `${serverURL}/api/flashauth/google/callback`
         );
 
         const authURL = oAuthClientInstance.generateAuthUrl({
@@ -81,17 +88,18 @@ router.get('/google/url', async(req, res)=>{
             prompt: "select_account",
             state: clientPublicKey
         });
+
+
         if(!authURL){
-            return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin"});
+            return res.json(new ResponseData(false, null, "CLIENT ERROR: Could not generate Google Auth URL", 400));
         }
 
-        const data = {
-            success: true,
-            url: authURL
-        }
-        return res.status(200).json(data);
+        const data = { url: authURL };
+        const response = new ResponseData(true, data, "CLIENT ERROR: There is a problem with credentials", 200)
+        return res.json(response);
     } catch (error) {
-        return res.status(400).json({success: false, message: "INTERNAL SERVER ERROR: Error while generating google auth URL, Contact Admin"});
+        const response = new ResponseData(false, null, "INTERNAL SERVER ERROR: Contact Admin", 400);
+        return res.json(response);
     }
 });
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -116,24 +124,28 @@ router.get('/google/callback', async(req, res)=>{
     try {
         const {code, state} = req.query;                                     // NO AUTH CODE OR CLIENT PUBLIC KEY --> CANCEL
         if(!code || !state){
-            renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin", clientFrontEndURL, failurePage);
+            console.log(`⛔1 :  No ${!code? 'code' : 'clientPublicKey'} in callback , front end: ${_clientFrontEndURL}`);
+            renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error while generating auth URL, Contact Admin", _clientFrontEndURL, failurePage);
             return res.set('Content-Type', 'text/html').send(renderHTML);
         }
-        
-        // const userCredentialCollection = req.db.model('UserCredentials', UserCredentials);
-        // siteData = await userCredentialCollection.findOne({clientPublicKey: state});     // GET SITE OWNER's INFORMATION
+
         const clientPublicKey = state;
-        siteData = await getSiteData(clientPublicKey, req.db);
+
+        siteData = await getSiteData(clientPublicKey, req.db); // GET SITE DATA BY CLIENT PUBLIC KEY
 
         if(!siteData){  // IF NO USER CREDENTIALS---> RETURN ERROR
-            renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: Site data not found, Contact Admin", clientFrontEndURL, failurePage);
+            console.log(`⛔2 : No site data found in callback`);
+            renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error with sign in, Contact Admin. Error callback#2", _clientFrontEndURL, failurePage);
             return res.set('Content-Type', 'text/html').send(renderHTML);
         }
-            
+
+
 
         // -----------------------------------------------------------------------------------------
         //EXTRACT USER CREDENTIALS
         let {googleClientId, googleClientSecret, clientMongoDbUri, clientFrontEndURL} = siteData;
+        //------------------------------------------------------------------------------------------
+
 
         googleClientId = Decrypt(googleClientId).trim().replace(/\/+$/, '');
         googleClientSecret = Decrypt(googleClientSecret).trim();
@@ -144,10 +156,17 @@ router.get('/google/callback', async(req, res)=>{
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
-            `${localServer}/api/flashauth/google/callback`
+            `${serverURL}/api/flashauth/google/callback`
         );
 
-        const tokenResponse = await oAuthClientInstance.getToken(code);     // EXCHANGE  <===> AUTH TOKEN BY PROVIDING AUTH CODE
+
+        if(!oAuthClientInstance){
+            console.log(`⛔3 : No oAuthClientInstacne found in callback`);
+            renderHTML = formatErrorInHtml("INTERNAL SERVER ERROR: There is an error with sing in, Contact Admin. Error callback#3", _clientFrontEndURL, failurePage);
+            return res.set('Content-Type', 'text/html').send(renderHTML);
+        }
+
+        const tokenResponse:any = await oAuthClientInstance.getToken(code as string);     // EXCHANGE  <===> AUTH TOKEN BY PROVIDING AUTH CODE
         oAuthClientInstance.setCredentials(tokenResponse.tokens.id_token);
 
         const ticket = await oAuthClientInstance.verifyIdToken({            // RETURN GOOGLE USER INFORMATION AFTER VERIFYING TOKEN
@@ -179,7 +198,7 @@ router.get('/google/callback', async(req, res)=>{
 
         // ------------------------------------------------------------------------------------------------------
         // TRY CRAETE / UPDATE USER IN CLIENT's MONGODB
-        const createOrUpdateInDb = await findOrCreate(clientMongoDbUri,userProfile);
+        const createOrUpdateInDb:any = await findOrCreate(clientMongoDbUri,userProfile);
         if(createOrUpdateInDb.success == false){
             renderHTML = formatErrorInHtml(createOrUpdateInDb.message, clientFrontEndURL, failurePage);
             return res.set('Content-Type', 'text/html').send(renderHTML);
@@ -258,7 +277,7 @@ router.post('/local/signup', async(req, res)=>{
             authProvider: "local"
         }
 
-        const createOrUpdateInDb = await findOrCreate(Decrypt(siteData.clientMongoDbUri), userProfile);  // TRY CREATE NEW USER  
+        const createOrUpdateInDb:any = await findOrCreate(Decrypt(siteData.clientMongoDbUri), userProfile);  // TRY CREATE NEW USER  
 
         // USER WILL BE CREATED OR CHECKED IF ALREADY EXISTS
         if(createOrUpdateInDb.success === false){
@@ -379,7 +398,7 @@ router.get('/fetch/profile', async(req, res)=>{
 
     let siteData;
     try {
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        const decodedToken:any = jwt.verify(token, process.env.JWT_SECRET_KEY);
         if(!decodedToken){
             return res.status(400).json({success: false, message: "CLIENT ERROR: Invalid Token, Please sign in"});
         }
@@ -409,5 +428,5 @@ router.get('/fetch/profile', async(req, res)=>{
 });
 
 
-module.exports = router;
+export default router;
 //--------------------------------------------------------------------------------------------------------------

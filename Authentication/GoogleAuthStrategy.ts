@@ -1,11 +1,11 @@
-import { AuthStrategy } from "../Interface/AuthStrategy";
+import { AuthStrategy } from "../Interface/AuthStrategy.ts";
 import { Request, Response } from "express";
-import firebaseAdmin from '../config/firebaseAdmin';
-import {userSchema} from '../models/User.model';
-import { generateJWT } from "../utils/jwtConfig";
-import { UserData } from "../utils/UserData";
-import { ResponseData } from "../utils/ResponseData";
-import { AuthType } from "../utils/AuthType";
+import firebaseAdmin from '../config/firebaseAdmin.ts';
+import userSchema from '../models/User.model.js';
+import generateJWT  from "../utils/jwtConfig.ts";
+import { UserData } from "../utils/UserData.ts";
+import { ResponseData } from "../utils/ResponseData.ts";
+import { AuthType } from "../utils/AuthType.ts";
 
 
 
@@ -26,8 +26,7 @@ export class GoogleAuthStrategy implements AuthStrategy{
 
     // HANDLE SIGN UP AND SIGN UP IN SMAE FUNCTION
     private async handleGoogleAuth(req: Request, res: Response): Promise<any>{
-        console.log(`Entered in google auth function...`)
-        const googleAuthToken = req.header('Authorization')?.replace('Bearer Google:', "");
+        const googleAuthToken = req.header('Authorization')?.replace('Bearer google:', '');
 
         if(!googleAuthToken){
             return new ResponseData(false, null, "CLIENT ERROR: INVALID USER TOKEN", 403);
@@ -38,6 +37,8 @@ export class GoogleAuthStrategy implements AuthStrategy{
             const decodedToken = await firebaseAdmin.auth().verifyIdToken(googleAuthToken);
 
             const user = await Users.findOne({email: decodedToken.email}).lean().exec();
+
+            
             // IF USER EXIST
             if(user){
                 const userObject = {
@@ -68,7 +69,8 @@ export class GoogleAuthStrategy implements AuthStrategy{
 
             return new ResponseData(true, jwtToken, "Successfully signed up", 201);
         } catch (error) {
-            return new ResponseData(false, null, "Successfully signed up", 500);
+            console.log(error);
+            return new ResponseData(false, null, "INTERNAL SERVER ERROR", 500);
         }
     }
 }
