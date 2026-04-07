@@ -1,15 +1,15 @@
-import { AuthStrategy } from "../Interface/AuthStrategy.ts";
+import IAuthStrategy from "../Interface/IAuthStrategy.ts";
 import { Request, Response } from "express";
 import firebaseAdmin from '../config/firebaseAdmin.ts';
 import userSchema from '../models/User.model.js';
 import generateJWT  from "../utils/jwtConfig.ts";
-import { UserData } from "../utils/UserData.ts";
+import UserData from "../utils/UserData.ts";
 import { ResponseData } from "../utils/ResponseData.ts";
 import { AuthType } from "../utils/AuthType.ts";
 
 
 
-export class GoogleAuthStrategy implements AuthStrategy{
+export class GoogleAuthStrategy implements IAuthStrategy{
     async signup(req: Request, res: Response): Promise<ResponseData> {
         return await this.handleGoogleAuth(req, res);
     }

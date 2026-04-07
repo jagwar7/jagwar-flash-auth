@@ -5,16 +5,8 @@ import {ITokenVerifier} from '../Interface/ITokenVerifier.ts'
 import { AuthType } from '../utils/AuthType.ts';
 import { IAuthenticateRequest } from '../Interface/IAuthenticateRequest.ts';
 import { ResponseData } from '../utils/ResponseData.ts';
+import UserData from '../utils/UserData.ts';
 
-
-
-
-interface UserData{
-    id: string,
-    email: string,
-    name: string,
-    authType: AuthType,
-}
 
 interface JWTUser extends jwt.JwtPayload{
     id: string;
@@ -60,19 +52,20 @@ export class JWTTokenVerifier implements ITokenVerifier{
             const decodedToken:any = jwt.verify(token, process.env.JWT_SECRET_KEY) ;
             if(!decodedToken){
                 console.log(`❌#1: Token verification failed`);
-                return res.json(new ResponseData(false, null, "CLIENT ERROR: Token verification failed, Error: JWT_verification#1", 401));
+                return res.json(new ResponseData(false, null, "CLIENT ERROR: Token verification failed, Error: jwt_verification#1", 401));
             }
-            req.user = {
-                id:         decodedToken.id,
-                email:      decodedToken.email,
-                name:       decodedToken.name,
-                authType:   AuthType.local
-            };
-            console.log(`🎟️#2: decoded user data: ${req.user}`);
+            // req.user = {
+            //     id:         decodedToken.id,
+            //     email:      decodedToken.email,
+            //     name:       decodedToken.name,
+            //     authType:   AuthType.local
+            // };
+            req.user = new UserData(decodedToken.id, decodedToken.name, decodedToken.email, AuthType.local);
+            console.log(`📝#2: user data: ${req.user.id}, ${req.user.email} `)
             next();
         }catch(err:any){  
             console.log(`🎟️Failed to verify token: ${err.name} msg: ${err.message}`)
-            res.status(401).json({success: false, message: "Invalid token"});
+            res.json(new ResponseData(false, null, "INTERNAL SERVER ERROR. Error_code: jwt_verification#2", 401))
         }
     }
 }

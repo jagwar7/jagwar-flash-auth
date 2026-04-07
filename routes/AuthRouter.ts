@@ -49,23 +49,23 @@ authRouter.post("/signup", async(req: Request, res: Response) =>{
  *  */ 
 
 authRouter.post("/signin", async(req: Request, res: Response) =>{
-    console.log(`🔁#1: Attempt to sign up with google...`)
+    console.log(`🔁#1: Attempt to sign in`)
     try {
 
         const type = req.header('X-AuthProvider') as AuthType;
-        console.log(`🎟️#2: AuthType from req.params: ${type} ...`)
+        console.log(`🎟️#2: AuthType from req.params: ${type} ...`);
 
         const authStrategy = authFactory.authMap.get(type);
 
         // IF NO AUTH STRATEGY ----> THEN RETURN NAGETIVE RESPONSE
         if(!authStrategy){
             const response = new ResponseData(false, null, "UNSUPPORTED AUTH PROVIDER", 400);
-            return res.status(response.status).json(response);
+            return res.json(response);
         }
-        console.log(`strategy: ${authStrategy.getAuthType()}`);
+        console.log(`📝 #3: Authstrategy: ${authStrategy.getAuthType()}`);
         
-        const result = await authStrategy.signup(req, res);
-        return res.status(result.status).json(result);
+        const response = await authStrategy.signin(req, res);
+        return res.status(response.status).json(response);
     } catch (error) {
         console.error(`Error: `, error);
         const response = new ResponseData(false, null, `INTERNAL SERVER ERROR: ${error.message}`, 500);

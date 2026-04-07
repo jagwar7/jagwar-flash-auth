@@ -1,7 +1,7 @@
-import { AuthType } from "./AuthType";
+import { AuthType } from "./AuthType.ts";
 
 
-export class UserData {
+export default class UserData {
     public id          : string;
     public name        : string;
     public email       : string;

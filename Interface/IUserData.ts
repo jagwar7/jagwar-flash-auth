@@ -1,4 +1,4 @@
-import { AuthType } from "../utils/AuthType";
+import { AuthType } from "../utils/AuthType.ts";
 
 
 
