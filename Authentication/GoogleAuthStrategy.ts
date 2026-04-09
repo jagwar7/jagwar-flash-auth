@@ -26,10 +26,14 @@ export class GoogleAuthStrategy implements IAuthStrategy{
 
     // HANDLE SIGN UP AND SIGN UP IN SMAE FUNCTION
     private async handleGoogleAuth(req: Request, res: Response): Promise<any>{
-        const googleAuthToken = req.header('Authorization')?.replace('Bearer google:', '');
+        const googleAuthToken = req.header('Authorization')?.replace('Bearer ', '');
+        const type = req.header('X-AuthProvider');
 
+        if(!type || type != AuthType.google){
+            return new ResponseData(false, null, "CLIENT ERROR: Invalid auth provider. Error_code: google_auth#1", 403);
+        }
         if(!googleAuthToken){
-            return new ResponseData(false, null, "CLIENT ERROR: INVALID USER TOKEN", 403);
+            return new ResponseData(false, null, "CLIENT ERROR: INVALID USER TOKEN. Error_code: google_auth#2", 403);
         }
 
         try {
@@ -38,21 +42,18 @@ export class GoogleAuthStrategy implements IAuthStrategy{
 
             const user = await Users.findOne({email: decodedToken.email}).lean().exec();
 
-            
+            //----------------------------------------------------------------------------------------------------------
             // IF USER EXIST
             if(user){
-                const userObject = {
-                    id          : user._id,
-                    name        : user.name,
-                    email       : user.email,
-                    authType    : AuthType.google
-                }
-                console.log('User already exist: ' , userObject);
-
-                const jwtToken:string = generateJWT(userObject);
-                return new ResponseData(true, jwtToken, "Successfully signed in", 200);
+                const userObject:UserData = new UserData(user._id.toString(), user.name, user.email, AuthType.google);
+                const signedToken:string = generateJWT(userObject);
+                return new ResponseData(true, signedToken, "Successfully signed in. Error_code: google_auth#3", 200);
             }
+            //----------------------------------------------------------------------------------------------------------
 
+
+
+            //----------------------------------------------------------------------------------------------------------
             // IF USER DOESNT EXIST , CREATE NEW USER
             const newUser = new Users({
                 name        : decodedToken.name,
@@ -62,15 +63,22 @@ export class GoogleAuthStrategy implements IAuthStrategy{
             });
 
             await newUser.save();
-            console.log(`Saved User: ${newUser}`);
-            const userData = new UserData(newUser.id, newUser.name, newUser.email, newUser.authType as AuthType);
-            const jwtToken:string = generateJWT(userData); // SIGN JWT
-            console.log(`JWT SIGNED TOKEN : ${jwtToken}`);
+            //----------------------------------------------------------------------------------------------------------
 
-            return new ResponseData(true, jwtToken, "Successfully signed up", 201);
+            
+            console.log(`Saved User: ${newUser}`);
+
+
+            //----------------------------------------------------------------------------------------------------------
+            // SEND SIGNED TOKEN
+            const userData = new UserData(newUser.id, newUser.name, newUser.email, newUser.authType as AuthType);
+            const signedToken:string = generateJWT(userData); // SIGN JWT
+            console.log(`JWT SIGNED TOKEN : ${signedToken}`);
+
+            return new ResponseData(true, signedToken, "Successfully signed up", 201);
         } catch (error) {
             console.log(error);
-            return new ResponseData(false, null, "INTERNAL SERVER ERROR", 500);
+            return new ResponseData(false, null, "INTERNAL SERVER ERROR: Error_code: google_auth#4", 500);
         }
     }
 }

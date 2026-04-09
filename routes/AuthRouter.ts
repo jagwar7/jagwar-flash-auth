@@ -2,7 +2,7 @@ import {HandleTokenVerification} from '../middlewares/AuthMiddleware.ts'
 import {RequestPasswordReset, ResetPassword} from '../Managers/PasswordManager.js';
 import {Router, Request, Response} from 'express';
 import { AuthType } from '../utils/AuthType.ts';
-import { authFactory } from '../Authentication/AuthManager.ts';
+import { authFactory } from '../Managers/AuthManager.ts';
 import { ResponseData } from '../utils/ResponseData.ts';
 import { IAuthenticateRequest } from '../Interface/IAuthenticateRequest.ts';
 

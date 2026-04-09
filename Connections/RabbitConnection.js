@@ -49,3 +49,5 @@ export const PushNotificationToQueue = async (data) => {
         return false;
     }
 };
+
+export {rabbitChannel};

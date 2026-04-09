@@ -54,14 +54,9 @@ export class JWTTokenVerifier implements ITokenVerifier{
                 console.log(`❌#1: Token verification failed`);
                 return res.json(new ResponseData(false, null, "CLIENT ERROR: Token verification failed, Error: jwt_verification#1", 401));
             }
-            // req.user = {
-            //     id:         decodedToken.id,
-            //     email:      decodedToken.email,
-            //     name:       decodedToken.name,
-            //     authType:   AuthType.local
-            // };
+
+            
             req.user = new UserData(decodedToken.id, decodedToken.name, decodedToken.email, AuthType.local);
-            console.log(`📝#2: user data: ${req.user.id}, ${req.user.email} `)
             next();
         }catch(err:any){  
             console.log(`🎟️Failed to verify token: ${err.name} msg: ${err.message}`)
@@ -86,19 +81,15 @@ export const HandleTokenVerification = (req, res, next): any=>{
     let token = req.header('Authorization');
     if(!token){
         console.log(`⛔ #1: No token found`);
-        return res.status(401).json({success: false, message: "No token passed on"});
+        return res.json(new ResponseData(false, null, 'CLIENT ERROR: No token found, Please sign in.', 401));
     }
 
-    console.log(`🎟️#1: Auth Token: ${token}`);
+    const authType = req.header('X-AuthProvider');  // GET AUTHTYPE HEADER
 
-
-    const authType = req.header('X-AuthProvider');
-    console.log(`🎟️#2: AuthType : ${authType} `);
-
-    token = token.replace(`Bearer ${authType}:`, '');
-    console.log(token);
+    token = token.replace(`Bearer `, '');
     
     const verifier:ITokenVerifier = authVerifierMap.get(authType as AuthType);
+
     if(!verifier){
         return res.json(new ResponseData(false, null, "Unsupported auth provider", 401));
     }

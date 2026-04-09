@@ -35,6 +35,7 @@ services:
       - RABBIT_HOST=${ENV_RABBIT_HOST}
       - RABBIT_USER=${ENV_RABBIT_USER}
       - RABBIT_PASSWORD=${ENV_RABBIT_PASSWORD}
+      - FRONTEND_URL=${ENV_FRONTEND_URL}
     # volumes:
     #   - ./firebase_config.json:/app/config/firebase_config.json # HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
     depends_on:
