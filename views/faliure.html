@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlashAuth Error</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 95vh;
+            width: 100vw;
+            margin: 0;
+            background: #020617; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+        }
+
+        .window {
+            width: 100%;
+            height: 100%;
+            padding: 2.5rem;
+            background: #0b1120; 
+            border: 1px solid #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 3.5rem;
+        }
+
+        .flash-text, .auth-text {
+            font-weight: 900;
+            font-style: italic;
+            font-size: 1.5rem;
+            color: #f97316; 
+            letter-spacing: -0.025em;
+        }
+
+        .brand-icon-svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .circle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.05);
+            border: 2px solid rgba(239, 68, 68, 0.15);
+            margin-bottom: 2.5rem;
+            animation: pulse-error 2s infinite ease-in-out;
+        }
+
+        .crossmark { 
+            width: 90px; 
+            height: 90px; 
+        }
+
+
+        .circle {
+            stroke: #ef4444; 
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: 260;
+            stroke-dashoffset: 260;
+            animation: circle-draw 0.8s forwards ease-in-out;
+        }
+
+        .cross {
+            stroke: #ef4444;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 100; 
+            stroke-dashoffset: 100;
+            opacity: 0; 
+        }
+
+        .cross1 {
+            animation: draw-cross 0.4s forwards ease-out 0.6s;
+        }
+
+        .cross2 {
+            animation: draw-cross 0.4s forwards ease-out 0.8s;
+        }
+
+        
+        @keyframes circle-draw { 
+            to { stroke-dashoffset: 0; } 
+        }
+
+        @keyframes draw-cross {
+            to {
+                stroke-dashoffset: 0;
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse-error {
+            0%, 100% { box-shadow: 0 0 0px rgba(239, 68, 68, 0); }
+            50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
+        }
+
+        
+        .bottom-area { 
+            text-align: center;
+        }
+
+        .bottom-area h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #f8fafc;
+        }
+
+        .bottom-area p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            margin-top: 0.75rem;
+            max-width: 250px;
+            line-height: 1.5;
+        }
+        .visible-toggle{
+            display: none;
+        }
+        .center{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="window">
+        <div class="center">
+            <div class="brand">
+                <span class="flash-text">FLASH</span>
+                <svg class="brand-icon-svg" viewBox="0 0 1024 1024">
+                    <path d="M704 469.333333h-200.533333L640 106.666667H405.333333l-128 448h183.466667L362.666667 960z" fill="#f97316" />
+                </svg>
+                <span class="auth-text">AUTH</span>
+            </div>
+            
+            <div class="circle-btn">
+                <svg class="crossmark" viewBox="0 0 100 100">
+                    <circle class="circle" cx="50" cy="50" r="40" fill="none"/>
+                    <path class="cross cross1" fill="none" d="M35 35 L65 65"/>
+                    <path class="cross cross2" fill="none" d="M65 35 L35 65"/>
+                </svg>
+            </div>
+
+            <div class="bottom-area">
+                <h2>Authentication Failed</h2>
+                <p class="visible-toggle">{{errorMessage}}</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Communicate error to parent window if it exists
+        if (window.opener) {
+            window.opener.postMessage(
+                { 
+                    type: "FLASHAUTH_ERROR", 
+                    error: "{{errorMessage}}" 
+                },
+                "{{clientFrontEndURL}}"
+            );
+        }
+
+        // Auto-close popup after 5 seconds
+        setTimeout(() => { 
+            window.close(); 
+        }, 5000);
+    </script>
+</body>
+</html>
