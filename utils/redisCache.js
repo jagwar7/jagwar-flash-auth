@@ -7,6 +7,7 @@ const CACHE_DURATION = 1800
 
 const getSiteData = async(clientPublicKey, db) =>{
     const cacheKey = `site_data:${clientPublicKey}`;
+    console.log(`cache key: ${cacheKey}`);
 
     try {
         // CHECK IF REDIS IS CONNECTED
@@ -25,6 +26,7 @@ const getSiteData = async(clientPublicKey, db) =>{
         
         // IF DATA IN EXIST IN REDIS , THEN RETURN FROM MEMORY
         if(cachedData){
+            console.log(`cache data: `,cachedData);
             console.log('📦 Returning cached data from Redis');
             return JSON.parse(cachedData);
         }

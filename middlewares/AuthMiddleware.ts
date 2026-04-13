@@ -49,18 +49,13 @@ export class JWTTokenVerifier implements ITokenVerifier{
     async VerifyToken(req: IAuthenticateRequest, res: Response, token: string, next: NextFunction): Promise<any> {
         console.log(`⛔Attempting JWT verification in middleware`)
         try{
-            const decodedToken:any = jwt.verify(token, process.env.JWT_SECRET_KEY) ;
-            if(!decodedToken){
-                console.log(`❌#1: Token verification failed`);
-                return res.json(new ResponseData(false, null, "CLIENT ERROR: Token verification failed, Error: jwt_verification#1", 401));
-            }
+            const decodedToken:any = jwt.verify(token, process.env.JWT_SECRET_KEY) as any ;
 
-            
             req.user = new UserData(decodedToken.id, decodedToken.name, decodedToken.email, AuthType.local);
             next();
         }catch(err:any){  
             console.log(`🎟️Failed to verify token: ${err.name} msg: ${err.message}`)
-            res.json(new ResponseData(false, null, "INTERNAL SERVER ERROR. Error_code: jwt_verification#2", 401))
+            res.json(new ResponseData(false, null, "FAILED TO VERIFY TOKEN, PLEASE SIGN IN.", 401))
         }
     }
 }

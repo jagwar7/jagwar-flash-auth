@@ -16,13 +16,21 @@ router.get('/get', HandleTokenVerification, async(req:IAuthenticateRequest, res)
         const UserCredential = req.db.model('UserCredentials', UserCredentials);
         let creds = await UserCredential.findOne({owner: req.user.id});
         if(!creds){
-            return res.json(new ResponseData(false, null , "No credentials found, Please add your credentials.", 404));
+            return res.json(new ResponseData(false, null , "No credentials found, Please update your credentials.", 404));
         }
+
+        //-----------------------------------------------------------------------------------------------------
+        // ENCYRPT SENSITIVE DATA
         creds.clientFrontEndURL = Decrypt(creds.clientFrontEndURL);
         creds.clientSecretKey = Decrypt(creds.clientSecretKey);
         creds.googleClientId = Decrypt(creds.googleClientId);
         creds.googleClientSecret = Decrypt(creds.googleClientSecret);
         creds.clientMongoDbUri = Decrypt(creds.clientMongoDbUri);
+        //-----------------------------------------------------------------------------------------------------
+
+
+        
+ 
         return res.status(200).json({success: true, message:"Fetched latest credentials", data: creds});
     } catch (error) {
         return res.status(500).json({success: false, message: "Error fetching credentials"});

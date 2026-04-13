@@ -32,7 +32,7 @@ server.use(
       return callback(null, origin);
     },
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-AuthProvider'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-AuthProvider', 'X-Client-Id'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   })
 );

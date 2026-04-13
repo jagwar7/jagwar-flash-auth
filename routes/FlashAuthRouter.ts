@@ -55,27 +55,45 @@ const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
 router.get('/google/url', async(req, res)=>{
     const clientPublicKey = req.header('X-Client-Id');
     try {
+
+        //------------------------------------------------------------------------------------------------------------------------------
+        //1. IF NO CLIENT PUBLIC KEY PROVIDED
         if(!clientPublicKey){
             const response = new ResponseData(false, null, "CLIENT ERROR: Missing client public key", 400);
             return res.json(response);
         }
+        //------------------------------------------------------------------------------------------------------------------------------
 
+
+
+
+        //------------------------------------------------------------------------------------------------------------------------------
+        //2. FETCH USER SITE CONFIGS FROM FLASHAUTH DATABASE
         const siteData = await getSiteData(clientPublicKey, req.db);
 
         if(!siteData){
             return res.json(new ResponseData(false, null, "CLIENT ERROR: There is a problem with credentials", 400));
         }
+        //------------------------------------------------------------------------------------------------------------------------------
 
 
+
+
+        //------------------------------------------------------------------------------------------------------------------------------
+        //3. DECODE USER CREDENTIALS
         let {googleClientId, googleClientSecret, clientFrontEndURL} = siteData;  
-        _clientFrontEndURL = clientFrontEndURL;
+        _clientFrontEndURL = Decrypt(clientFrontEndURL);
         googleClientId = Decrypt(googleClientId);
         googleClientSecret = Decrypt(googleClientSecret);
 
         googleClientId = googleClientId.trim().replace(/\/+$/, '');
         googleClientSecret = googleClientSecret.trim();
-        
+        //------------------------------------------------------------------------------------------------------------------------------
 
+
+
+        //------------------------------------------------------------------------------------------------------------------------------
+        //4. GENERATE O AUTH URL
         const oAuthClientInstance = new OAuth2Client(
             googleClientId,
             googleClientSecret,
@@ -88,14 +106,21 @@ router.get('/google/url', async(req, res)=>{
             prompt: "select_account",
             state: clientPublicKey
         });
+        //------------------------------------------------------------------------------------------------------------------------------
 
 
+
+
+        //------------------------------------------------------------------------------------------------------------------------------
+        //5. IF FAILED TO GENERATE O AUTH URL , 
         if(!authURL){
-            return res.json(new ResponseData(false, null, "CLIENT ERROR: Could not generate Google Auth URL", 400));
+            return res.json(new ResponseData(false, null, "CLIENT ERROR: FAILED TO GERENATE OAUTH URL, CHECK YOUR CREDENTIALS", 400));
         }
-
+        //------------------------------------------------------------------------------------------------------------------------------
+        
+        
         const data = { url: authURL };
-        const response = new ResponseData(true, data, "CLIENT ERROR: There is a problem with credentials", 200)
+        const response = new ResponseData(true, data, "Successfully fetched oAuthURL", 200);
         return res.json(response);
     } catch (error) {
         const response = new ResponseData(false, null, "INTERNAL SERVER ERROR: Contact Admin", 400);
@@ -228,7 +253,7 @@ router.get('/google/callback', async(req, res)=>{
 
     } catch (error) {
         renderHTML = formatErrorInHtml('INTERNAL SERVER ERROR: There is a technical error, Contact Admin', 
-            Decrypt(siteData?.clientFrontEndURL) || '', failurePage);
+        Decrypt(siteData?.clientFrontEndURL) || '', failurePage);
         return res.set('Content-Type', 'text/html').send(renderHTML);
     }
 });
