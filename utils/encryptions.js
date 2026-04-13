@@ -8,4 +8,4 @@ const Decrypt = (data)=>{
   return Buffer.from(data, 'base64').toString('utf8');
 }
 
-module.exports = {Encrypt, Decrypt};
+export {Encrypt, Decrypt};

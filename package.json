@@ -1,15 +1,18 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/server.js",
   "scripts": {
-    "jagwar": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx server.ts",
+    "jagwar": "tsx watch server.ts"
   },
   "keywords": [],
   "author": "Jagwar",
   "license": "ISC",
-  "description": "Flash Auth backend, that will do necessary authentication related operation behalf of client who will use FlashAuthSDK",
+  "description": "Flash Auth backend",
   "dependencies": {
     "amqplib": "^0.10.9",
     "bcrypt": "^6.0.0",
@@ -27,6 +30,21 @@
     "nodemon": "^3.1.10",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "redis": "^5.10.0"
+    "redis": "^5.10.0",
+    "tsx": "^4.19.2",
+    "validator": "^13.15.35"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.8",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.5.0",
+    "@types/nodemailer": "^7.0.11",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.17",
+    "@types/validator": "^13.15.10",
+    "typescript": "^5.4.0"
   }
 }

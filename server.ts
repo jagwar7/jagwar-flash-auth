@@ -1,13 +1,14 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const AuthRouter = require('./routes/AuthRouter');
-const FlashAuthRouter = require('./routes/FlashAuthRouter');
-const CredentialsRouter = require('./routes/CredentialsRouter');
-const {RedisConnectionSetup, connectToRedis} = require('./Connections/RedisConnection')
-require('dotenv').config();
-const cors = require('cors'); 
-const FlashAuthDBConnection  = require('./Connections/MongoDBConnection');
-const { ConnectToRabbit } = require('./Connections/RabbitConnection');
+import express from 'express';
+import mongoose from 'mongoose';
+import AuthRouter from './routes/AuthRouter.ts';
+import FlashAuthRouter from './routes/FlashAuthRouter.ts';
+import CredentialsRouter from './routes/CredentialsRouter.ts';
+import { RedisConnectionSetup, redisClient } from './Connections/RedisConnection.js';
+import 'dotenv/config';
+import cors from 'cors';
+// import FlashAuthDBConnection from './Connections/MongoDBConnection.js';
+import { ConnectToRabbit } from './Connections/RabbitConnection.js';
+
 const server = express();
 
 // Debug mode
@@ -31,6 +32,8 @@ server.use(
       return callback(null, origin);
     },
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-AuthProvider', 'X-Client-Id'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   })
 );
 
@@ -40,12 +43,14 @@ server.use(
 
 // MONGOOSE CONNECTION SETUP----------------------------------------------------------------------------------------------
 const startTime = Date.now();
-const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
-        maxPoolSize: 5,
-        serverSelectionTimeoutMS: 10000,
-        connectTimeoutMS: 5000, // CONNECTION TIMEOUT
-        autoIndex: false, 
-});
+const mongoDBUrl = process.env.MONGODB_CONNECTION_URL;
+
+    const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
+            maxPoolSize: 5,
+            serverSelectionTimeoutMS: 10000,
+            connectTimeoutMS: 10000, // CONNECTION TIMEOUT
+            autoIndex: false, 
+    });
 
 
     FlashAuthDB.on('connecting', () => console.log("🔄 Connecting to FlashAuth database..."));
@@ -62,7 +67,7 @@ const FlashAuthDB = mongoose.createConnection(mongoDBUrl, {
 const ensureConnection = async (req, res, next) => {
   try {
     if (FlashAuthDB.readyState !== 1) {
-      return res.status(503).json({ err: "Database is not ready" });
+      return res.status(503).json({ err: "Error: Database is not ready" });
     }
     req.db = FlashAuthDB;
     next();
@@ -83,17 +88,18 @@ const port = process.env.CONTAINER_PORT;
 const startServer = async () => {
     // START REDIS FIRST
     RedisConnectionSetup(startTime).then(()=>{
-        ConnectToRabbit().then(()=>{
-            const runningServer = server.listen(port, ()=>{
+        // ConnectToRabbit().then(()=>{
+            
+        // }).catch((err)=>{
+        //     console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
+        // });
+        const runningServer = server.listen(port, ()=>{
               console.log(`🌐✅ #3. Server started inside docker port : ${port} in ${Date.now()-startTime} ms`);
             });
             
             runningServer.on('error', (err)=>{
               console.log(`❌⚠️ #3. Critical server failure: ${err.message}`);
             });
-        }).catch((err)=>{
-            console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
-        });
     }).catch((err)=>{
         console.log(`❌⚠️#1. Critical failure on redis`);
     })
@@ -122,7 +128,11 @@ server.use('/flashauth/credentials', ensureConnection, CredentialsRouter);
 
 
 
-process.on('unhandledRejection', (err) => {
-    console.error('❌ UNHANDLED SERVER ERROR:', err.message, err.stack, new Date().toISOString());
+process.on('unhandledRejection', (reason: unknown) => {
+  if(reason instanceof Error){
+    console.error('❌ UNHANDLED SERVER ERROR:', reason.message, reason.stack, new Date().toISOString());
+  }else{
+    console.error('❌⛔ UNHANDLED REJECTION', reason, new Date().toISOString());
+  }
 });
 //------------------------------------------------------------------------------------------------------------------------
