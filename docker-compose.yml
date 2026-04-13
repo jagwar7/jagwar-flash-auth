@@ -1,0 +1,52 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis-container
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flashauth-network
+
+  backend:
+    build: .
+    image: flash-auth-app:v1
+    container_name: flashauth-container
+    restart: always
+    ports:
+      - "${ENV_SYSTEM_PORT}:${ENV_CONTAINER_PORT}" # INCOMING TRAFFIC ON : SYSTEM_PORT ----FORWARDED---> CONTAINER_PORT 
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
+      - CONTAINER_PORT=${ENV_CONTAINER_PORT}  #  DOCKER CONTAINER PORT <----- ENV_CONTAINER_PORT
+      - REDIS_URL=redis://redis-container:6379
+      # - GOOGLE_APPLICATION_CREDENTIALS=/app/config/firebase_config.json
+      - RABBIT_HOST=${ENV_RABBIT_HOST}
+      - RABBIT_USER=${ENV_RABBIT_USER}
+      - RABBIT_PASSWORD=${ENV_RABBIT_PASSWORD}
+      - FRONTEND_URL=${ENV_FRONTEND_URL}
+    # volumes:
+    #   - ./firebase_config.json:/app/config/firebase_config.json # HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - flashauth-network
+
+networks:
+  flashauth-network:
+    driver: bridge
+
+volumes:
+  redis_data:

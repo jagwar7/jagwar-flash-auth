@@ -1,3 +1,0 @@
-
-
-const Encrypt = (string)
