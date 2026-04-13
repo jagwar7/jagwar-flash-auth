@@ -31,7 +31,7 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Brand Styling */
+        
         .brand {
             display: flex;
             align-items: center;
@@ -43,7 +43,7 @@
             font-weight: 900;
             font-style: italic;
             font-size: 1.5rem;
-            color: #f97316; /* Brand Orange */
+            color: #f97316; 
             letter-spacing: -0.025em;
         }
 
@@ -52,7 +52,6 @@
             height: 32px;
         }
 
-        /* Error Icon Container */
         .circle-btn {
             display: flex;
             align-items: center;
@@ -71,9 +70,9 @@
             height: 90px; 
         }
 
-        /* Outer Circle Animation */
+
         .circle {
-            stroke: #ef4444; /* Error Red */
+            stroke: #ef4444; 
             stroke-width: 6;
             stroke-linecap: round;
             stroke-dasharray: 260;
@@ -81,14 +80,13 @@
             animation: circle-draw 0.8s forwards ease-in-out;
         }
 
-        /* Cross Lines Animation - Fixed "Dot" Issue */
         .cross {
             stroke: #ef4444;
             stroke-width: 8;
             stroke-linecap: round;
             stroke-dasharray: 100; 
             stroke-dashoffset: 100;
-            opacity: 0; /* Keeps it invisible until draw starts */
+            opacity: 0; 
         }
 
         .cross1 {
@@ -99,7 +97,7 @@
             animation: draw-cross 0.4s forwards ease-out 0.8s;
         }
 
-        /* Keyframes */
+        
         @keyframes circle-draw { 
             to { stroke-dashoffset: 0; } 
         }
@@ -116,7 +114,7 @@
             50% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.15); }
         }
 
-        /* Text Area */
+        
         .bottom-area { 
             text-align: center;
         }
