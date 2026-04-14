@@ -1,8 +1,14 @@
+# Folders
 node_modules
-npm-debug.log
+.history
 .git
-.gitignore
-.env
-.DS_Store
-README.md
 dist
+build
+
+# Environment and Logs
+.env
+*.log
+npm-debug.log*
+
+# OS Files
+.DS_Store

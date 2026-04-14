@@ -1,31 +1,27 @@
-# dependencies
+# Dependencies
 node_modules/
 
-# dotenv
+# Local History (The culprit for your 4,000+ file change)
+.history/
+
+# Environment / Secrets
 .env
+.firebase_config.json
+config/firebase_config.json
 
-# local history
-.history
-
-# logs
-logs
-*.log
-
-# build
+# Build Output
 dist/
 build/
 
-# misc
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# IDE / OS Files
 .DS_Store
-
-
-
-tory*
-*type*
-*wc*
-*~*
+.vscode/
+.idea/
 *.swp
 *.swo
-
-.firebase_config.json
-./config/firebase_config.json
+*~
