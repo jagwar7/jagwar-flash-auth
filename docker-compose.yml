@@ -37,7 +37,7 @@ services:
       - FRONTEND_URL=${ENV_FRONTEND_URL}
       - CONTAINER_PROXY_URL=${ENV_PROXY_URL}
     volumes:
-      - ./firebase_config.json:/app/config/firebase_config.json # HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
+      - ./firebase_config.json:/app/config/firebase_config.json #  HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
     depends_on:
       redis:
         condition: service_healthy
