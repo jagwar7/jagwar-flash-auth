@@ -80,7 +80,7 @@ ENV_RABBIT_PASSWORD=${rabbitPassword}
 MONGODB_CONNECTION_URL=${mongodbURI}
 JWT_SECRET_KEY=${jwtSecretKey}
 ENV_DOCKER_IMAGE_URL=${ECR_REPO_URL}:latest
-ENV_PROXY_URL=13.238.159.180:5850
+ENV_PROXY_URL=https://movement-del-jimmy-answered.trycloudflare.com
 EOF\",
                         \"aws s3 cp s3://${FLASHAUTH_S3_BUCKET}/flashauth-backend/docker-compose.yml /home/ubuntu/flashauth-backend/docker-compose.yml\",
                         \"cd /home/ubuntu/flashauth-backend && docker compose pull\",
