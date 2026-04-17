@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-.package-lock.json
+
 
 # Local History (The culprit for your 4,000+ file change)
 .history/
