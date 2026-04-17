@@ -19,8 +19,8 @@ services:
       - flashauth-network
 
   backend:
-    # build: .
-    image: ${ENV_DOCKER_IMAGE_URL}
+    build: .
+    image: jagwar-flash-app:v1
     container_name: flashauth-container
     restart: always
     ports:
@@ -36,8 +36,8 @@ services:
       - RABBIT_PASSWORD=${ENV_RABBIT_PASSWORD}
       - FRONTEND_URL=${ENV_FRONTEND_URL}
       - CONTAINER_PROXY_URL=${ENV_PROXY_URL}
-    volumes:
-      - ./firebase_config.json:/app/config/firebase_config.json #  HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
+    # volumes:
+    #   - ./firebase_config.json:/app/config/firebase_config.json #  HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
     depends_on:
       redis:
         condition: service_healthy
