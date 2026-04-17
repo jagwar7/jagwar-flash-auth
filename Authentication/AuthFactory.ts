@@ -1,4 +1,4 @@
-import IAuthStrategy from "../Interface/IAuthStrategy.ts";    
+import IAuthStrategy from "../Interface/IAuthStrategyx.ts";    
 import { AuthType } from "../utils/AuthType.ts";
 
 

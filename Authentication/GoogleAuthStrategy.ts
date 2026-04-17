@@ -1,4 +1,4 @@
-import IAuthStrategy from "../Interface/IAuthStrategy.ts";
+import IAuthStrategy from "../Interface/IAuthStrategyx.ts";
 import { Request, Response } from "express";
 import firebaseAdmin from '../config/firebaseAdmin.ts';
 import userSchema from '../models/User.model.js';

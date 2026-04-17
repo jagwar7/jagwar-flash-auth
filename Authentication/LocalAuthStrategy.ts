@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import IAuthStrategy from "../Interface/IAuthStrategy.ts";
+import IAuthStrategy from "../Interface/IAuthStrategyx.ts";
 import { AuthType } from "../utils/AuthType.ts";
 import { ResponseData } from "../utils/ResponseData.ts";
 import userSchema from "../models/User.model.js";
