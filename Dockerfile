@@ -18,4 +18,4 @@ RUN npm run build
 EXPOSE 5800  
 
 
-CMD ["node", "dist/server.ts"]
+CMD ["node", "dist/server.js"]
