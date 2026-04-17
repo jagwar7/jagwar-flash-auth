@@ -1,4 +1,4 @@
-import { UserCredentials } from '../models/UserCredentials.model';
+import { UserCredentials } from '../models/UserCredentials.model.js';
 import {redisClient, RedisConnectionSetup} from '../Connections/RedisConnection.js';
 
 

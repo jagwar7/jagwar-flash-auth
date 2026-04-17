@@ -1,5 +1,5 @@
-import { AuthStrategy } from "../Interface/AuthStrategy";
-import { AuthType } from "../utils/AuthType";
+import { AuthStrategy } from "../Interface/AuthStrategy.ts";
+import { AuthType } from "../utils/AuthType.ts";
 
 
 export class AuthFactory{
