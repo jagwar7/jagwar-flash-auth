@@ -82,8 +82,7 @@ const ensureConnection = async (req, res, next) => {
 
 
 // REDIS CONNECTION--------------------------------------------------------------------------------------------------------------------------------------------------
-
-const port = process.env.CONTAINER_PORT;
+const port = process.env.CONTAINER_PORT || 5800;
 const startServer = async () => {
     // START REDIS FIRST
     RedisConnectionSetup(startTime).then(()=>{
