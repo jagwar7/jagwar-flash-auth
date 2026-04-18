@@ -16,7 +16,7 @@ export const ConnectToRabbit = async () => {
         console.log(`RABBIT CONFIGS : ${hostIP} , ${user} , ${password}`);
 
         
-        rabbitConnection = await rabbitProtocol.connect(`${protocol}://${user}:${encodeURIComponent(password)}@${hostIP}:5672`);
+        rabbitConnection = await rabbitProtocol.connect(`${protocol}://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${hostIP}:5672`);
         rabbitChannel = await rabbitConnection.createChannel();
 
         console.log(`🌐 RABBIT CHANNEL INITIALIZED`);
