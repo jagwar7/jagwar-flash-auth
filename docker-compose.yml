@@ -1,22 +1,22 @@
 services:
-  redis:
-    image: redis:7-alpine
-    container_name: redis-container
-    restart: always
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redis_data:/data
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - flashauth-network
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis-container
+  #   restart: always
+  #   command: ["redis-server", "--appendonly", "yes"]
+  #   volumes:
+  #     - redis_data:/data
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         memory: 256M
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - flashauth-network
 
   backend:
     build: .
@@ -38,9 +38,9 @@ services:
       - CONTAINER_PROXY_URL=${ENV_PROXY_URL}
     # volumes:
     #   - ./firebase_config.json:/app/config/firebase_config.json #  HAND OVER FIREBASE CONFIG FROM UBUNTU DIRECTORY TO ----> CONTAINER
-    depends_on:
-      redis:
-        condition: service_healthy
+    # depends_on:
+    #   redis:
+    #     condition: service_healthy
     networks:
       - flashauth-network
 
@@ -48,5 +48,5 @@ networks:
   flashauth-network:
     driver: bridge
 
-volumes:
-  redis_data:
+# volumes:
+#   redis_data:

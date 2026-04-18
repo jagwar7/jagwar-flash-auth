@@ -85,12 +85,20 @@ const ensureConnection = async (req, res, next) => {
 const port = process.env.CONTAINER_PORT || 5800;
 const startServer = async () => {
     // START REDIS FIRST
-    RedisConnectionSetup(startTime).then(()=>{
+    // RedisConnectionSetup(startTime).then(()=>{
+
+    // }).catch((err)=>{
+    //     console.log(`❌⚠️#1. Critical failure on redis`);
+    // });
+
+
         // ConnectToRabbit().then(()=>{
             
         // }).catch((err)=>{
         //     console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
         // });
+
+        
         const runningServer = server.listen(port, ()=>{
               console.log(`🌐✅ #3. Server started inside docker port : ${port} in ${Date.now()-startTime} ms`);
             });
@@ -98,9 +106,6 @@ const startServer = async () => {
             runningServer.on('error', (err)=>{
               console.log(`❌⚠️ #3. Critical server failure: ${err.message}`);
             });
-    }).catch((err)=>{
-        console.log(`❌⚠️#1. Critical failure on redis`);
-    })
 
 };
 startServer();
