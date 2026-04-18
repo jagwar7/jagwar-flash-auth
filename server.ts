@@ -92,11 +92,11 @@ const startServer = async () => {
     // });
 
 
-        // ConnectToRabbit().then(()=>{
-            
-        // }).catch((err)=>{
-        //     console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
-        // });
+        ConnectToRabbit().then(()=>{
+            console.log(`🌐✅Successfully connected to RabbitMQ`)
+        }).catch((err)=>{
+            console.log(`❌⛔ #2 Failed to setup Rabbit MQ Connection : ${err.message}`);
+        });
 
         
         const runningServer = server.listen(port, ()=>{
