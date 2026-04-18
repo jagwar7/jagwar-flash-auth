@@ -8,7 +8,7 @@ export const ConnectToRabbit = async () => {
     if (rabbitConnection && rabbitChannel) return { rabbitConnection, rabbitChannel };
 
     try {
-        const protocol = 'amqp';
+        const protocol = 'amqps';
         const hostIP = process.env.RABBIT_HOST;
         const user = process.env.RABBIT_USER;
         const password = process.env.RABBIT_PASSWORD;
