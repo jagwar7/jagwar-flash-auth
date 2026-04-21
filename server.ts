@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import AuthRouter from './routes/AuthRouter.ts';
 import FlashAuthRouter from './routes/FlashAuthRouter.ts';
 import CredentialsRouter from './routes/CredentialsRouter.ts';
-import { RedisConnectionSetup, redisClient } from './Connections/RedisConnection.js';
+// import { RedisConnectionSetup, redisClient } from './Connections/RedisConnection.js';
 import 'dotenv/config';
 import cors from 'cors';
 import { ConnectToRabbit } from './Connections/RabbitConnection.js';

@@ -47,7 +47,7 @@ export class GoogleAuthStrategy implements IAuthStrategy{
             if(user){
                 const userObject:UserData = new UserData(user._id.toString(), user.name, user.email, AuthType.google);
                 const signedToken:string = generateJWT(userObject);
-                return new ResponseData(true, signedToken, "Successfully signed in. Error_code: google_auth#3", 200);
+                return new ResponseData(true, signedToken, "SUCCESSFULLY SIGNED IN", 200);
             }
             //----------------------------------------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ export class GoogleAuthStrategy implements IAuthStrategy{
             const signedToken:string = generateJWT(userData); // SIGN JWT
             console.log(`JWT SIGNED TOKEN : ${signedToken}`);
 
-            return new ResponseData(true, signedToken, "Successfully signed up", 201);
+            return new ResponseData(true, signedToken, "SUCCESSFULLY SIGNED UP", 201);
         } catch (error) {
             console.log(error);
             return new ResponseData(false, null, "INTERNAL SERVER ERROR: Error_code: google_auth#4", 500);
