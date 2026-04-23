@@ -10,7 +10,7 @@ export default class EmailService implements INotificationService{
         // rabbit_mail#1
         if(!rabbitChannel){
             console.log(`📝 #1: Rabbit MQ connection is not established, Contact Admin. Error_code: rabbit_mail#1`);
-            return;
+            return new ResponseData(false, null, "Rabbit MQ connection is not established, Contact Admin. Error_code: rabbit_mail#1", 501);
         }
 
         // rabbit_mail#2
