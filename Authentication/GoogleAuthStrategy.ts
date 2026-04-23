@@ -81,7 +81,7 @@ export class GoogleAuthStrategy implements IAuthStrategy{
 
 
             //----------------------------------------------------------------------------------------------------------
-            // SEND WELCOME MAIL
+            // SENDING WELCOME MAIL
             const emailData:EmailNotificationData = new EmailNotificationData(userData.email, "", userData.name, "flashauth.connectjagwar.online/update-credentials" )
             NotificationSender.send_welcome_email(emailData);
             //----------------------------------------------------------------------------------------------------------
