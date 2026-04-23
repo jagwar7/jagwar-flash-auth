@@ -1,0 +1,4 @@
+export enum TemplateName {
+    WELCOME_EMAIL= "WELCOME_EMAIL",
+    PASSWORD_RESET = "PASSWORD_RESET"
+}

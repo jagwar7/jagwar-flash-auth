@@ -6,6 +6,8 @@ import generateJWT  from "../utils/jwtConfig.ts";
 import UserData from "../utils/UserData.ts";
 import { ResponseData } from "../utils/ResponseData.ts";
 import { AuthType } from "../utils/AuthType.ts";
+import NotificationSender from "../services/NotificationSender.ts";
+import { EmailNotificationData } from "../services/NotificationData.ts";
 
 
 
@@ -74,6 +76,16 @@ export class GoogleAuthStrategy implements IAuthStrategy{
             const userData = new UserData(newUser.id, newUser.name, newUser.email, newUser.authType as AuthType);
             const signedToken:string = generateJWT(userData); // SIGN JWT
             console.log(`JWT SIGNED TOKEN : ${signedToken}`);
+            //----------------------------------------------------------------------------------------------------------
+
+
+
+            //----------------------------------------------------------------------------------------------------------
+            // SEND WELCOME MAIL
+            const emailData:EmailNotificationData = new EmailNotificationData(userData.email, "", userData.name, "flashauth.connectjagwar.online/update-credentials" )
+            NotificationSender.send_welcome_email(emailData);
+            //----------------------------------------------------------------------------------------------------------
+            
 
             return new ResponseData(true, signedToken, "Successfully signed up", 201);
         } catch (error) {
