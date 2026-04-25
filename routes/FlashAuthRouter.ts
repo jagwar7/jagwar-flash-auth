@@ -233,7 +233,11 @@ router.get('/google/callback', async(req, res)=>{
 
         //-------------------------------------------------------------------------
         //SIGN JWT FOR CLIENT
-        const flashToken = jwt.sign(userProfile, process.env.JWT_SECRET_KEY, {
+        const userObject = {
+            ...userProfile,
+            role : createOrUpdateInDb.role
+        }
+        const flashToken = jwt.sign(userObject, process.env.JWT_SECRET_KEY, {
             expiresIn: siteData.tokenExpiryDuration,
         });
         //-------------------------------------------------------------------------

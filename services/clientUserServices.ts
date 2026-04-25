@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import { ResponseData } from '../utils/ResponseData.ts';
 
 const defaultUserSchema = new mongoose.Schema({
     name: {type: String, required: function(){return this.isNew}},
@@ -12,6 +13,7 @@ const defaultUserSchema = new mongoose.Schema({
             return this.authProvider == 'local'
         }
     },
+    role:{type: String, enum:["user", "admin"], default: "user"},
     avatar: {type: String},
     emailVerified: {type: Boolean, default: function(){return this.authProvider == "google"}},
     passwordResetToken: {type: String},
@@ -52,7 +54,8 @@ async function findOrCreate(clientMongodbUri, userProfile){
             success: false,
             message: "INTERNAL SERVER ERROR: Failed to connect with Database, Contact Admin"
         }
-        return resObj;
+        // return resObj;
+        return new ResponseData(false, null, "INTERNAL SERVER ERROR: Failed to connect with Database, Contact Admin", 501);
     }
 
     // TRY CREATING USER-------------------------------------
@@ -61,18 +64,9 @@ async function findOrCreate(clientMongodbUri, userProfile){
 
     if(user) {
         if(userProfile.authProvider === "local"){
-            
-            const resObj = {
-                success: false,
-                message: "User already exists. Please sign in"
-            }
-            return resObj;
+            return new ResponseData(false, null, "User already exists. Please sign in", 401);
         }
-        const resObj = {
-            success: true,
-            data: user
-        }
-       return resObj;
+       return new ResponseData(true, user, "Successfully signed in", 200);
     }
     const modifiedUser = {
         ...userProfile,
@@ -81,12 +75,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
     
     // CREATE NEW USER IF DOESNT EXIST 
     user = await User.create(modifiedUser);
-    const resObj = {
-        success: true,
-        message: "Successfully signed up",
-        data: user
-    }
-    return resObj;
+    return new ResponseData(true, user, "Successfully signed up", 200);
 }
 
 
