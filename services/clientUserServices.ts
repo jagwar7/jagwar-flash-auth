@@ -73,6 +73,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
     
     // CREATE NEW USER IF DOESNT EXIST 
     user = await User.create(modifiedUser);
+    console.log(`user role, while creating: ${user.role}`)
     return new ResponseData(true, user, "Successfully signed up", 200);
 }
 

@@ -235,7 +235,7 @@ router.get('/google/callback', async(req, res)=>{
         //SIGN JWT FOR CLIENT
         const userObject = {
             ...userProfile,
-            role : createOrUpdateInDb.role
+            role : createOrUpdateInDb.user.role
         }
 
         console.log(`name and role : ${userProfile.name}, ${userObject.role}`)
