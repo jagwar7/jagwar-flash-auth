@@ -49,16 +49,14 @@ async function getClientConnection(uri){
 // FIND OR CREAETE USER IN CLITNT'S DB
 async function findOrCreate(clientMongodbUri, userProfile){
     const connection = await getClientConnection(clientMongodbUri);
+    // #1. CHECK IF USER DATA CONNECTION IS ESTABLISHED?
     if(!connection){
-        const resObj = {
-            success: false,
-            message: "INTERNAL SERVER ERROR: Failed to connect with Database, Contact Admin"
-        }
-        // return resObj;
         return new ResponseData(false, null, "INTERNAL SERVER ERROR: Failed to connect with Database, Contact Admin", 501);
     }
 
-    // TRY CREATING USER-------------------------------------
+
+
+    // #2. TRY CREATING USER-------------------------------------
     const User = connection.model('user', defaultUserSchema);
     let user = await User.findOne({email: userProfile.email});
 
