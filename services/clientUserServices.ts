@@ -67,7 +67,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
             if(userProfile.authProvider === "local"){
                 return new ResponseData(false, null, "User already exists. Please sign in", 401);
             }
-        return new ResponseData(true, user, "Successfully signed in", 200);
+            return new ResponseData(true, user, "Successfully signed in", 200);
         }
         const modifiedUser = {
             ...userProfile,

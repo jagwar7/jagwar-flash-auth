@@ -234,11 +234,11 @@ router.get('/google/callback', async(req, res)=>{
         //-------------------------------------------------------------------------
         //SIGN JWT FOR CLIENT
         const userObject = {
-            ...userProfile
-            // role : createOrUpdateInDb.user.role
+            ...userProfile,
+            role : createOrUpdateInDb.data.role
         }
 
-        console.log(`name and role : ${userProfile.name}, ${createOrUpdateInDb?.data?.role}`)
+        
         const flashToken = jwt.sign(userObject, process.env.JWT_SECRET_KEY, {
             expiresIn: siteData.tokenExpiryDuration,
         });
