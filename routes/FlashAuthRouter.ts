@@ -223,7 +223,7 @@ router.get('/google/callback', async(req, res)=>{
 
         // ------------------------------------------------------------------------------------------------------
         // TRY CRAETE / UPDATE USER IN CLIENT's MONGODB
-        const createOrUpdateInDb:any = await findOrCreate(clientMongoDbUri,userProfile);
+        const createOrUpdateInDb:ResponseData = await findOrCreate(clientMongoDbUri,userProfile);
         if(createOrUpdateInDb.success == false){
             renderHTML = formatErrorInHtml(createOrUpdateInDb.message, clientFrontEndURL, failurePage);
             return res.set('Content-Type', 'text/html').send(renderHTML);
@@ -238,7 +238,7 @@ router.get('/google/callback', async(req, res)=>{
             // role : createOrUpdateInDb.user.role
         }
 
-        console.log(`name and role : ${userProfile.name}, ${createOrUpdateInDb?.user?.role}`)
+        console.log(`name and role : ${userProfile.name}, ${createOrUpdateInDb?.data?.role}`)
         const flashToken = jwt.sign(userObject, process.env.JWT_SECRET_KEY, {
             expiresIn: siteData.tokenExpiryDuration,
         });
