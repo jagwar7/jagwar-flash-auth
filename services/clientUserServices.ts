@@ -13,7 +13,7 @@ const defaultUserSchema = new mongoose.Schema({
             return this.authProvider == 'local'
         }
     },
-    role:{type: String, enum:["user", "admin"], default: "user", required: true, lowercase: true, trim: true},
+    role:{type: String, enum:["user", "admin"], default: "user", required: true},
     avatar: {type: String},
     emailVerified: {type: Boolean, default: function(){return this.authProvider == "google"}},
     passwordResetToken: {type: String},
@@ -71,7 +71,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
         }
         const modifiedUser = {
             ...userProfile,
-            role: "user",
+            // role: "user",
             flashAuthId: crypto.randomUUID()
         };
         
