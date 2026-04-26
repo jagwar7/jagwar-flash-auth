@@ -13,7 +13,7 @@ const defaultUserSchema = new mongoose.Schema({
             return this.authProvider == 'local'
         }
     },
-    role:{type: String, enum:["user", "admin"], default: "user", required: true},
+    role:{type: String, enum:["user", "admin"], default: "user", required: true, lowercase: true, trim: true},
     avatar: {type: String},
     emailVerified: {type: Boolean, default: function(){return this.authProvider == "google"}},
     passwordResetToken: {type: String},
@@ -53,6 +53,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
     if(!connection){
         return new ResponseData(false, null, "INTERNAL SERVER ERROR: Failed to connect with Database, Contact Admin", 501);
     }
+    if(connection.model['user']) delete connection.model['user'];
 
 
 
