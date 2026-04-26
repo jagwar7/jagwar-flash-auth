@@ -13,7 +13,7 @@ const defaultUserSchema = new mongoose.Schema({
             return this.authProvider == 'local'
         }
     },
-    role:{type: String, enum:["user", "admin"], default: "user"},
+    role:{type: String, enum:["user", "admin"], default: "user", required: true},
     avatar: {type: String},
     emailVerified: {type: Boolean, default: function(){return this.authProvider == "google"}},
     passwordResetToken: {type: String},
@@ -73,7 +73,8 @@ async function findOrCreate(clientMongodbUri, userProfile){
     
     // CREATE NEW USER IF DOESNT EXIST 
     user = await User.create(modifiedUser);
-    console.log(`user role, while creating: ${user.role}`)
+    const savedUser = user.toObject();
+    console.log(`user role, while creating: ${savedUser.role}`) // <----- ERROR.. NEED TO BE FIXED...
     return new ResponseData(true, user, "Successfully signed up", 200);
 }
 
