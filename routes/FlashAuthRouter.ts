@@ -238,7 +238,7 @@ router.get('/google/callback', async(req, res)=>{
             // role : createOrUpdateInDb.user.role
         }
 
-        // console.log(`name and role : ${userProfile.name}, ${userObject.role}`)
+        console.log(`name and role : ${userProfile.name}, ${createOrUpdateInDb.user.role}`)
         const flashToken = jwt.sign(userObject, process.env.JWT_SECRET_KEY, {
             expiresIn: siteData.tokenExpiryDuration,
         });

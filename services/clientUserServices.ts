@@ -13,7 +13,7 @@ const defaultUserSchema = new mongoose.Schema({
             return this.authProvider == 'local'
         }
     },
-    role:{type: String, enum:["user", "admin"], default: "user", required: true},
+    role:{type: String, enum:["user", "admin"], default: "user", required: true, lowercase: true, trim: true},
     avatar: {type: String},
     emailVerified: {type: Boolean, default: function(){return this.authProvider == "google"}},
     passwordResetToken: {type: String},
@@ -71,17 +71,16 @@ async function findOrCreate(clientMongodbUri, userProfile){
         }
         const modifiedUser = {
             ...userProfile,
-            // role: "user",
+            role: "user",
             flashAuthId: crypto.randomUUID()
         };
         
         // CREATE NEW USER IF DOESNT EXIST 
-        const newUser = new User(modifiedUser);
-        user = await newUser.save();
+
+        const savedUser = await User.create(modifiedUser);
         
-        // const savedUser = user.toObject();
-        // console.log(`user role, while creating: ${savedUser.role}`);
-        return new ResponseData(true, user, "Successfully signed up", 200);
+        console.log(`user role, while creating: ${savedUser.role}`);
+        return new ResponseData(true, savedUser, "Successfully signed up", 200);
     } catch (error) {
         console.error("!!! DATABASE ERROR !!!", error.message);
         return new ResponseData(false, null, `DB Error: ${error.message}`, 500);
