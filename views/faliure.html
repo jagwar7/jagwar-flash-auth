@@ -172,13 +172,17 @@
 
     <script>
         // Communicate error to parent window if it exists
+        const rawError  = `{{errorMessage}}`;
+        const originURL = `{{clientFrontEndURL}}`;
+
+
         if (window.opener) {
             window.opener.postMessage(
                 { 
                     type: "FLASHAUTH_ERROR", 
-                    error: "{{errorMessage}}" 
+                    error: rawError
                 },
-                "{{clientFrontEndURL}}"
+                originURL
             );
         }
 

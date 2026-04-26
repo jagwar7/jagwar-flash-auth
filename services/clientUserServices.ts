@@ -74,7 +74,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
     
     // CREATE NEW USER IF DOESNT EXIST 
     const newUser = new User(modifiedUser);
-    user = newUser.save();
+    user = await newUser.save();
     
     const savedUser = user.toObject();
     console.log(`user role, while creating: ${savedUser.role}`) // <----- ERROR.. NEED TO BE FIXED...

@@ -39,7 +39,7 @@ const router = express.Router();
 
 //RESPONSE PAGE HELPER------------------------------------------------------------------------------------------------
 const formatErrorInHtml = ( message, clientFrontEndURL, errorPage)=>{
-  return errorPage.replace('{{errorMessage}}', message).replace('{{clientFrontEndURL}}', clientFrontEndURL);
+  return errorPage.replace(/{{errorMessage}}/g, message).replace(/{{clientFrontEndURL}}/g, clientFrontEndURL);
 }
 //--------------------------------------------------------------------------------------------------------------------
 
