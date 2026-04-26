@@ -59,27 +59,33 @@ async function findOrCreate(clientMongodbUri, userProfile){
 
     // #2. TRY CREATING USER-------------------------------------
     const User = connection.model('user', defaultUserSchema);
-    let user = await User.findOne({email: userProfile.email});
 
-    if(user) {
-        if(userProfile.authProvider === "local"){
-            return new ResponseData(false, null, "User already exists. Please sign in", 401);
+    try {
+        let user = await User.findOne({email: userProfile.email});
+
+        if(user) {
+            if(userProfile.authProvider === "local"){
+                return new ResponseData(false, null, "User already exists. Please sign in", 401);
+            }
+        return new ResponseData(true, user, "Successfully signed in", 200);
         }
-       return new ResponseData(true, user, "Successfully signed in", 200);
+        const modifiedUser = {
+            ...userProfile,
+            role: "user",
+            flashAuthId: crypto.randomUUID()
+        };
+        
+        // CREATE NEW USER IF DOESNT EXIST 
+        const newUser = new User(modifiedUser);
+        user = await newUser.save();
+        
+        const savedUser = user.toObject();
+        console.log(`user role, while creating: ${savedUser.role}`);
+        return new ResponseData(true, user, "Successfully signed up", 200);
+    } catch (error) {
+        console.error("!!! DATABASE ERROR !!!", error.message);
+        return new ResponseData(false, null, `DB Error: ${error.message}`, 500);
     }
-    const modifiedUser = {
-        ...userProfile,
-        role: "user",
-        flashAuthId: crypto.randomUUID()
-    };
-    
-    // CREATE NEW USER IF DOESNT EXIST 
-    const newUser = new User(modifiedUser);
-    user = await newUser.save();
-    
-    const savedUser = user.toObject();
-    console.log(`user role, while creating: ${savedUser.role}`) // <----- ERROR.. NEED TO BE FIXED...
-    return new ResponseData(true, user, "Successfully signed up", 200);
 }
 
 
