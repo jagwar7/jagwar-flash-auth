@@ -79,8 +79,8 @@ async function findOrCreate(clientMongodbUri, userProfile){
         const newUser = new User(modifiedUser);
         user = await newUser.save();
         
-        const savedUser = user.toObject();
-        console.log(`user role, while creating: ${savedUser.role}`);
+        // const savedUser = user.toObject();
+        // console.log(`user role, while creating: ${savedUser.role}`);
         return new ResponseData(true, user, "Successfully signed up", 200);
     } catch (error) {
         console.error("!!! DATABASE ERROR !!!", error.message);
