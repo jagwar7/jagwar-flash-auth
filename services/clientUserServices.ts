@@ -69,6 +69,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
     }
     const modifiedUser = {
         ...userProfile,
+        role: "user",
         flashAuthId: crypto.randomUUID()
     };
     
