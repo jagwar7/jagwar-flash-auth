@@ -53,7 +53,7 @@ async function findOrCreate(clientMongodbUri, userProfile){
     if(!connection){
         return new ResponseData(false, null, "INTERNAL SERVER ERROR: Failed to connect with Database, Contact Admin", 501);
     }
-    if(connection.model['user']) delete connection.model['user'];
+    if(connection.models['user']) delete connection.models['user'];
 
 
 
@@ -73,7 +73,9 @@ async function findOrCreate(clientMongodbUri, userProfile){
     };
     
     // CREATE NEW USER IF DOESNT EXIST 
-    user = await User.create(modifiedUser);
+    const newUser = new User(modifiedUser);
+    user = newUser.save();
+    
     const savedUser = user.toObject();
     console.log(`user role, while creating: ${savedUser.role}`) // <----- ERROR.. NEED TO BE FIXED...
     return new ResponseData(true, user, "Successfully signed up", 200);
