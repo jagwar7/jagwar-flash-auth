@@ -253,6 +253,7 @@ router.get('/google/callback', async(req, res)=>{
         //----------------------------------------------------------------
         // ✅ SUCCESS RESPONSE
         console.log("SUCCESS: RESPONSE");
+        res.set("Cross-Origin-Opener-Policy" : "same-origin-allow-popups");
         return res.set('Content-Type', 'text/html').send(renderHTML);
         //----------------------------------------------------------------
 
