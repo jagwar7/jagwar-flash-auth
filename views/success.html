@@ -148,15 +148,28 @@
         </div>
     </div>
 
-    <script>
-        if (window.opener) {
-            window.opener.postMessage(
-                { type: "FLASHAUTH_TOKEN", token: "{{flashToken}}" },
-                "{{clientFrontEndURL}}"
-            );
+<script>
+    console.log("Checking Opener...");
+    setTimeout(() => {
+        try {
+            if (window.opener) {
+                console.log("Opener found, sending message to: {{clientFrontEndURL}}");
+                
+                window.opener.postMessage(
+                    { type: "FLASHAUTH_TOKEN", token: "{{flashToken}}" },
+                    "*" // ALLOW ALL ORIGIN
+                );
+                
+                console.log("Message dispatched.");
+            } else {
+                console.error("CRITICAL: window.opener is NULL. COOP headers are still blocking the connection.");
+            }
+        } catch (e) {
+            console.error("PostMessage Error:", e);
         }
-        // Closes the popup after 3 seconds
-        setTimeout(() => { window.close(); }, 10000);
-    </script>
+    }, 500);
+
+    setTimeout(() => { window.close(); }, 15000); 
+</script>
 </body>
 </html>
